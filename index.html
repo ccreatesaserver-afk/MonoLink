@@ -1811,12 +1811,12 @@ function renderSourceBars() {
   `).join("");
 }
 function renderDeviceBars() {
-  const devs = [{lbl:"📱 מובייל",62},{lbl:"💻 דסקטופ",30},{lbl:"📟 טאבלט",8}];
+  const devs = [{lbl:"📱 מובייל",val:62},{lbl:"💻 דסקטופ",val:30},{lbl:"📟 טאבלט",val:8}];
   document.getElementById("device-bars").innerHTML = devs.map(d => `
     <div class="bar-row">
       <div class="bar-lbl">${d.lbl}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${d[1]}%"></div></div>
-      <div class="bar-num">${d[1]}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${d.val}%"></div></div>
+      <div class="bar-num">${d.val}%</div>
     </div>
   `).join("");
 }
