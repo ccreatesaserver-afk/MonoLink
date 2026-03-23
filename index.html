@@ -829,6 +829,16 @@ img { display:block; }
 
 /* spinner kept for buttons */
 
+/* ── Sort buttons ── */
+.sort-btn { font-size:0.72rem !important; padding:0.25rem 0.6rem !important; }
+.sort-btn.active { background:rgba(0,200,255,0.12) !important; color:var(--cyan) !important; border-color:rgba(0,200,255,0.3) !important; }
+
+/* ── Link meta desc ── */
+.link-meta-desc { font-size:0.7rem; color:var(--text-muted); }
+
+/* ── Link selected state ── */
+.link-row.selected { border-color:var(--cyan) !important; background:rgba(0,200,255,0.06) !important; }
+
 /* ═══════════════════════════════════════════════════════════════
    SPINNER
 ═══════════════════════════════════════════════════════════════ */
@@ -1087,6 +1097,7 @@ img { display:block; }
             </div>
             <div class="profile-name" id="dash-name">—</div>
             <div class="profile-email" id="dash-email">—</div>
+            <div id="dash-joined" style="font-size:0.72rem;color:var(--text-muted);margin-top:0.15rem;"></div>
           </div>
           <div class="stats-row mt-1">
             <div class="stat-tile">
@@ -1116,6 +1127,7 @@ img { display:block; }
           <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
             <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="navGo('public',null)">👁 תצוגה</button>
             <button class="btn btn-outline btn-sm" style="flex:1;" onclick="shareNative()">↗ שתף</button>
+            <button class="btn btn-ghost btn-sm" onclick="showQR()" title="QR Code">📲</button>
           </div>
         </div>
 
@@ -1158,6 +1170,36 @@ img { display:block; }
               <div class="panel-title"><div class="panel-title-dot"></div>הלינקים שלי</div>
               <button class="btn btn-primary btn-sm btn-glow" onclick="openModal()">+ הוסף לינק</button>
             </div>
+
+            <!-- Search bar -->
+            <div style="position:relative;margin-bottom:0.85rem;">
+              <input type="search" id="link-search" placeholder="🔍  חפש לינק..." oninput="onLinkSearch(this.value)"
+                style="padding-right:1rem;background:var(--surface2);border-color:var(--border);"/>
+            </div>
+
+            <!-- Sort + Tools row -->
+            <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.85rem;flex-wrap:wrap;">
+              <span style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-left:0.25rem;">מיון:</span>
+              <button class="sort-btn btn btn-ghost btn-xs active" data-sort="manual" onclick="setSortMode('manual')">ידני</button>
+              <button class="sort-btn btn btn-ghost btn-xs" data-sort="clicks"  onclick="setSortMode('clicks')">קליקים</button>
+              <button class="sort-btn btn btn-ghost btn-xs" data-sort="alpha"   onclick="setSortMode('alpha')">א-ב</button>
+              <button class="sort-btn btn btn-ghost btn-xs" data-sort="newest"  onclick="setSortMode('newest')">חדש</button>
+              <div style="flex:1;"></div>
+              <button class="btn btn-ghost btn-xs" onclick="exportLinks()" title="יצא JSON">📦 יצא</button>
+              <button class="btn btn-ghost btn-xs" onclick="importLinks()" title="יבא JSON">📥 יבא</button>
+              <button class="btn btn-ghost btn-xs" onclick="showQR()" title="QR Code">📲 QR</button>
+            </div>
+
+            <!-- Bulk action bar (hidden by default) -->
+            <div id="bulk-bar" style="display:none;align-items:center;gap:0.5rem;background:rgba(0,200,255,0.07);border:1px solid rgba(0,200,255,0.2);border-radius:var(--radius-sm);padding:0.6rem 0.9rem;margin-bottom:0.85rem;flex-wrap:wrap;">
+              <span class="bulk-count" style="font-size:0.82rem;color:var(--cyan);font-weight:600;"></span>
+              <div style="flex:1;"></div>
+              <button class="btn btn-success btn-xs" onclick="bulkToggle(true)">✅ הפעל</button>
+              <button class="btn btn-ghost btn-xs"   onclick="bulkToggle(false)">⏸ כבה</button>
+              <button class="btn btn-danger btn-xs"  onclick="bulkDelete()">🗑 מחק</button>
+              <button class="btn btn-ghost btn-xs"   onclick="clearSelection()">✕ בטל</button>
+            </div>
+
             <div class="links-stack" id="links-stack"></div>
           </div>
         </div>
@@ -1326,17 +1368,6 @@ const THEMES = [
 ];
 
 /* ──────────────────────────────────────────────────────────────
-   GLOBALS FOR HTML ONCLICK
-────────────────────────────────────────────────────────────── */
-Object.assign(window, {
-  navGo, switchAuthTab, doEmailLogin, doRegister, doGoogleLogin,
-  doForgotPassword, doSignOut, togglePwVis, checkPwStrength,
-  openModal, closeModal, saveLink, editLink, deleteLink, toggleLink,
-  switchTab, saveSettings, copyLink, shareNative,
-  selectEmoji: e => { selEmoji = e; renderEmojiGrid(); }
-});
-
-/* ──────────────────────────────────────────────────────────────
    AUTH STATE
 ────────────────────────────────────────────────────────────── */
 onAuthStateChanged(auth, async u => {
@@ -1344,9 +1375,10 @@ onAuthStateChanged(auth, async u => {
   if (u) {
     user = u;
     await ensureDoc(u);
-    listenDoc(u.uid);
+    listenDocUpgraded(u.uid);
     renderNavAuth();
     navGo("dashboard", document.getElementById("ntab-dashboard"));
+    setTimeout(()=>toast(`👋 שלום, ${u.displayName || "משתמש"}!`, "success"), 400);
   } else {
     user = null;
     if (unsub) { unsub(); unsub = null; }
@@ -1978,6 +2010,339 @@ function esc(s) {
 }
 function slug_of(name) {
   return String(name).toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
-}</script>
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GLOBALS FOR HTML ONCLICK — must be at end after all defs
+────────────────────────────────────────────────────────────── */
+Object.assign(window, {
+  navGo, switchAuthTab, doEmailLogin, doRegister, doGoogleLogin,
+  doForgotPassword, doSignOut, togglePwVis, checkPwStrength,
+  openModal, closeModal, saveLink, editLink, deleteLink, toggleLink,
+  switchTab, saveSettings, copyLink, shareNative,
+  selectEmoji: e => { selEmoji = e; renderEmojiGrid(); }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   ✨ UPGRADES — SEARCH, SORT, IMPORT, EXPORT, ONBOARDING
+══════════════════════════════════════════════════════════════ */
+
+/* ── Link Search / Filter ── */
+let searchQuery = "";
+window.onLinkSearch = function(val) {
+  searchQuery = val.toLowerCase().trim();
+  renderLinksList();
+};
+
+/* ── Sort Mode ── */
+let sortMode = "manual"; // manual | clicks | alpha | newest
+window.setSortMode = function(mode) {
+  sortMode = mode;
+  document.querySelectorAll(".sort-btn").forEach(b => b.classList.toggle("active", b.dataset.sort === mode));
+  renderLinksList();
+};
+
+function getSortedLinks() {
+  let arr = [...links];
+  if (searchQuery) arr = arr.filter(l => (l.title||"").toLowerCase().includes(searchQuery) || (l.url||"").toLowerCase().includes(searchQuery));
+  if (sortMode === "clicks")  arr.sort((a,b) => (b.clicks||0)-(a.clicks||0));
+  if (sortMode === "alpha")   arr.sort((a,b) => (a.title||"").localeCompare(b.title||"", "he"));
+  if (sortMode === "newest")  arr.sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+  return arr;
+}
+
+/* Override renderLinksList to use search+sort */
+const _origRenderLinks = renderLinksList;
+window.renderLinksList = renderLinksList; // keep ref
+function renderLinksListUpgraded() {
+  const el = document.getElementById("links-stack");
+  if (!el) return;
+  const sorted = getSortedLinks();
+  if (!links.length) {
+    el.innerHTML = `
+      <div class="empty-zone">
+        <div class="empty-icon">🔗</div>
+        <div class="empty-title">אין לינקים עדיין</div>
+        <p class="empty-sub">הוסף את הלינק הראשון שלך ותתחיל לשתף</p>
+        <button class="btn btn-primary btn-glow" onclick="openModal()">+ הוסף לינק</button>
+      </div>`;
+    return;
+  }
+  if (sorted.length === 0 && searchQuery) {
+    el.innerHTML = `<div class="empty-zone"><div class="empty-icon">🔍</div><div class="empty-title">אין תוצאות</div><p class="empty-sub">נסה חיפוש אחר</p></div>`;
+    return;
+  }
+  el.innerHTML = sorted.map((l,i) => `
+    <div class="link-row" data-id="${l.id}" draggable="${sortMode==='manual'}" style="animation-delay:${i*0.04}s"
+         ondragstart="dragStart(event,'${l.id}')"
+         ondragover="dragOver(event)"
+         ondrop="dragDrop(event,'${l.id}')"
+         ondragend="dragEnd(event)">
+      <span class="drag-grip" title="גרור לסידור" style="opacity:${sortMode==='manual'?1:0.2}">⠿</span>
+      <div class="link-icon-box">${l.emoji||"🔗"}</div>
+      <div class="link-meta">
+        <div class="link-meta-title">${esc(l.title)}</div>
+        <div class="link-meta-url">${esc(l.url)}</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.2rem;flex-wrap:wrap;">
+          ${l.clicks ? `<div class="link-meta-clicks">👆 ${l.clicks} קליקים</div>` : ""}
+          ${l.desc   ? `<div class="link-meta-desc">💬 ${esc(l.desc)}</div>` : ""}
+          ${l.active===false ? `<span class="badge badge-warn" style="font-size:0.65rem;">כבוי</span>` : `<span class="badge badge-green" style="font-size:0.65rem;">פעיל</span>`}
+        </div>
+      </div>
+      <div class="link-controls">
+        <div class="toggle ${l.active!==false?'on':''}" onclick="toggleLink('${l.id}')" title="${l.active!==false?'פעיל — לחץ לכיבוי':'כבוי — לחץ להפעלה'}"></div>
+        <button class="btn btn-ghost btn-icon-sq btn-sm" onclick="editLink('${l.id}')" title="ערוך">✏️</button>
+        <button class="btn btn-danger btn-icon-sq btn-sm" onclick="deleteLink('${l.id}')" title="מחק">🗑</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ── Export Links as JSON ── */
+window.exportLinks = function() {
+  if (!links.length) { toast("אין לינקים לייצוא","warn"); return; }
+  const data = JSON.stringify({ displayName: userData.displayName, bio: userData.bio, links }, null, 2);
+  const blob = new Blob([data], { type:"application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `monolink_${slug_of(userData.displayName||"export")}.json`;
+  a.click();
+  toast("📦 הלינקים יוצאו בהצלחה","success");
+};
+
+/* ── Import Links from JSON ── */
+window.importLinks = function() {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = ".json";
+  input.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const imported = (parsed.links || []).map(l => ({
+        ...l,
+        id: uid(),
+        clicks: 0,
+        createdAt: Date.now()
+      }));
+      if (!imported.length) { toast("⚠️ לא נמצאו לינקים בקובץ","warn"); return; }
+      links = [...links, ...imported];
+      await updateDoc(doc(db,"users",user.uid), { links });
+      toast(`✅ יובאו ${imported.length} לינקים!`,"success");
+    } catch(err) {
+      toast("❌ שגיאה בקריאת הקובץ","error");
+    }
+  };
+  input.click();
+};
+
+/* ── Duplicate Link ── */
+window.duplicateLink = async function(id) {
+  const orig = links.find(l => l.id===id);
+  if (!orig) return;
+  const copy = { ...orig, id: uid(), title: orig.title + " (עותק)", clicks: 0, createdAt: Date.now() };
+  links.push(copy);
+  await updateDoc(doc(db,"users",user.uid), { links });
+  toast("📄 הלינק שוכפל","success");
+};
+
+/* ── Bulk Delete ── */
+let selectedIds = new Set();
+window.toggleSelectLink = function(id, el) {
+  if (selectedIds.has(id)) { selectedIds.delete(id); el.classList.remove("selected"); }
+  else { selectedIds.add(id); el.classList.add("selected"); }
+  updateBulkBar();
+};
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  if (!bar) return;
+  if (selectedIds.size > 0) {
+    bar.style.display = "flex";
+    bar.querySelector(".bulk-count").textContent = `${selectedIds.size} נבחרו`;
+  } else {
+    bar.style.display = "none";
+  }
+}
+window.bulkDelete = async function() {
+  if (!selectedIds.size) return;
+  if (!confirm(`למחוק ${selectedIds.size} לינקים?`)) return;
+  links = links.filter(l => !selectedIds.has(l.id));
+  selectedIds.clear();
+  await updateDoc(doc(db,"users",user.uid), { links });
+  updateBulkBar();
+  toast("🗑 הלינקים נמחקו","success");
+};
+window.bulkToggle = async function(active) {
+  if (!selectedIds.size) return;
+  links = links.map(l => selectedIds.has(l.id) ? {...l, active} : l);
+  selectedIds.clear();
+  await updateDoc(doc(db,"users",user.uid), { links });
+  updateBulkBar();
+  toast(active ? "✅ הלינקים הופעלו" : "⏸ הלינקים כובו","success");
+};
+window.clearSelection = function() {
+  selectedIds.clear();
+  updateBulkBar();
+  renderLinksListUpgraded();
+};
+
+/* ── QR Code Generator ── */
+window.showQR = function() {
+  const slug = slug_of(userData.displayName || userData.uid || "user");
+  const url  = `https://monolink.app/u/${slug}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&bgcolor=020408&color=00c8ff&margin=10`;
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;";
+  overlay.innerHTML = `
+    <div style="background:#0a1628;border:1px solid rgba(0,200,255,0.35);border-radius:20px;padding:2rem;text-align:center;max-width:300px;box-shadow:0 0 40px rgba(0,200,255,0.15);">
+      <div style="font-family:'Orbitron',monospace;font-size:0.85rem;letter-spacing:0.1em;color:#8aa4c8;margin-bottom:1.25rem;text-transform:uppercase;">QR CODE</div>
+      <img src="${qrUrl}" style="width:220px;height:220px;border-radius:12px;border:2px solid rgba(0,200,255,0.2);" alt="QR"/>
+      <div style="font-size:0.75rem;color:#3d5475;margin-top:0.75rem;font-family:monospace;">${url}</div>
+      <div style="display:flex;gap:0.5rem;margin-top:1.25rem;justify-content:center;">
+        <a href="${qrUrl}" download="monolink-qr.png" class="btn btn-primary btn-sm">⬇️ הורד</a>
+        <button class="btn btn-ghost btn-sm" onclick="this.closest('[style*=fixed]').remove()">✕ סגור</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", e => { if (e.target===overlay) overlay.remove(); });
+};
+
+/* ── Bio character counter ── */
+const bioField = document.getElementById("settings-bio");
+if (bioField) {
+  const counter = document.createElement("div");
+  counter.style.cssText = "font-size:0.72rem;color:var(--text-muted);text-align:left;margin-top:0.3rem;";
+  counter.textContent = "0 / 160";
+  bioField.parentNode.appendChild(counter);
+  bioField.addEventListener("input", () => {
+    const len = bioField.value.length;
+    counter.textContent = `${len} / 160`;
+    counter.style.color = len > 140 ? "var(--pink)" : len > 100 ? "var(--gold)" : "var(--text-muted)";
+    if (len > 160) bioField.value = bioField.value.slice(0, 160);
+  });
+}
+
+/* ── Keyboard shortcut hints ── */
+window.addEventListener("keydown", e => {
+  if (!user) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  if ((e.metaKey||e.ctrlKey) && e.key==="k") { e.preventDefault(); openModal(); }
+  if (e.key==="1") navGo("dashboard", document.getElementById("ntab-dashboard"));
+  if (e.key==="2") navGo("analytics",  document.getElementById("ntab-analytics"));
+  if (e.key==="3") navGo("public",     document.getElementById("ntab-public"));
+  if (e.key==="Escape") closeModal();
+});
+
+/* ── Copy individual link URL ── */
+window.copyLinkUrl = function(url) {
+  navigator.clipboard.writeText(url)
+    .then(()  => toast("📋 URL הועתק","success"))
+    .catch(()  => toast("לא ניתן להעתיק","error"));
+};
+
+/* ── Stats animation on login ── */
+function animateCountUp(elId, target, duration=800) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const start = Date.now();
+  const tick = () => {
+    const p = Math.min(1, (Date.now()-start)/duration);
+    el.textContent = Math.floor(p * target);
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  };
+  requestAnimationFrame(tick);
+}
+
+/* Override listenDoc to trigger count-up on first load */
+const _origListenDoc = listenDoc;
+function listenDocUpgraded(uid_param) {
+  if (unsub) unsub();
+  const ref = doc(db, "users", uid_param);
+  let firstLoad = true;
+  unsub = onSnapshot(ref, snap => {
+    if (!snap.exists()) return;
+    userData    = snap.data();
+    links       = userData.links || [];
+    activeTheme = userData.theme || 0;
+
+    applyTheme(activeTheme);
+    renderProfile();
+    renderLinksListUpgraded();
+    renderPublicView();
+    renderThemeRow();
+    renderMiniAnalytics();
+    renderFullAnalytics();
+    updateBulkBar();
+
+    document.getElementById("settings-name").value = userData.displayName || "";
+    document.getElementById("settings-bio").value  = userData.bio || "";
+    // update bio counter
+    const bioField2 = document.getElementById("settings-bio");
+    if (bioField2) bioField2.dispatchEvent(new Event("input"));
+
+    const slug = slug_of(userData.displayName || userData.uid || "user");
+    document.getElementById("share-url").textContent = `monolink.app/u/${slug}`;
+
+    if (firstLoad) {
+      firstLoad = false;
+      animateCountUp("s-links",  links.length,              600);
+      animateCountUp("s-clicks", userData.totalClicks||0,   800);
+      animateCountUp("s-views",  userData.totalViews||0,    1000);
+    } else {
+      document.getElementById("s-links").textContent   = links.length;
+      document.getElementById("s-clicks").textContent  = userData.totalClicks || 0;
+      document.getElementById("s-views").textContent   = userData.totalViews  || 0;
+    }
+  });
+}
+
+/* Patch onAuthStateChanged to use upgraded versions */
+window._monoBootstrap = async function(u) {
+  user = u;
+  await ensureDoc(u);
+  listenDocUpgraded(u.uid);
+  renderNavAuth();
+  navGo("dashboard", document.getElementById("ntab-dashboard"));
+  // Show welcome toast with name
+  setTimeout(()=>toast(`👋 שלום, ${u.displayName || "משתמש"}!`, "success"), 400);
+};
+
+/* ── Onboarding tooltip (first visit) ── */
+function maybeShowOnboarding() {
+  if (links.length === 0 && !sessionStorage.getItem("ml_onboard")) {
+    sessionStorage.setItem("ml_onboard","1");
+    setTimeout(()=>{
+      toast("💡 לחץ '+ הוסף לינק' כדי להתחיל","success");
+    }, 800);
+  }
+}
+
+/* ── Upgrade renderProfile to show joined date ── */
+const _origRenderProfile = renderProfile;
+function renderProfileUpgraded() {
+  _origRenderProfile();
+  const joined = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
+  const joinedEl = document.getElementById("dash-joined");
+  if (joinedEl && joined) {
+    joinedEl.textContent = `חבר מ: ${joined.toLocaleDateString("he-IL")}`;
+  }
+}
+
+/* ── Confirm before sign out ── */
+const _origDoSignOut = doSignOut;
+window.doSignOut = function() {
+  if (!confirm("להתנתק?")) return;
+  signOut(auth); toast("👋 להתראות!");
+};
+
+/* re-export to window after all upgrades */
+Object.assign(window, {
+  exportLinks, importLinks, duplicateLink, showQR,
+  onLinkSearch, setSortMode, bulkDelete, bulkToggle, clearSelection,
+  renderLinksListUpgraded
+});
+</script>
 </body>
 </html>
