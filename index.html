@@ -2009,7 +2009,8 @@ function esc(s) {
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 function slug_of(name) {
-  return String(name).toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
+  const s = String(name).toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
+  return s || "user";
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -2031,7 +2032,7 @@ Object.assign(window, {
 let searchQuery = "";
 window.onLinkSearch = function(val) {
   searchQuery = val.toLowerCase().trim();
-  renderLinksList();
+  renderLinksListUpgraded();
 };
 
 /* ── Sort Mode ── */
@@ -2269,6 +2270,12 @@ function listenDocUpgraded(uid_param) {
 
     applyTheme(activeTheme);
     renderProfile();
+    // Show joined date
+    const joined = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
+    const joinedEl = document.getElementById("dash-joined");
+    if (joinedEl && joined) {
+      joinedEl.textContent = `חבר מ: ${joined.toLocaleDateString("he-IL")}`;
+    }
     renderLinksListUpgraded();
     renderPublicView();
     renderThemeRow();
@@ -2282,7 +2289,7 @@ function listenDocUpgraded(uid_param) {
     const bioField2 = document.getElementById("settings-bio");
     if (bioField2) bioField2.dispatchEvent(new Event("input"));
 
-    const slug = slug_of(userData.displayName || userData.uid || "user");
+    const slug = slug_of(userData.displayName || user.uid || "user");
     document.getElementById("share-url").textContent = `monolink.app/u/${slug}`;
 
     if (firstLoad) {
@@ -2298,17 +2305,6 @@ function listenDocUpgraded(uid_param) {
   });
 }
 
-/* Patch onAuthStateChanged to use upgraded versions */
-window._monoBootstrap = async function(u) {
-  user = u;
-  await ensureDoc(u);
-  listenDocUpgraded(u.uid);
-  renderNavAuth();
-  navGo("dashboard", document.getElementById("ntab-dashboard"));
-  // Show welcome toast with name
-  setTimeout(()=>toast(`👋 שלום, ${u.displayName || "משתמש"}!`, "success"), 400);
-};
-
 /* ── Onboarding tooltip (first visit) ── */
 function maybeShowOnboarding() {
   if (links.length === 0 && !sessionStorage.getItem("ml_onboard")) {
@@ -2319,25 +2315,13 @@ function maybeShowOnboarding() {
   }
 }
 
-/* ── Upgrade renderProfile to show joined date ── */
-const _origRenderProfile = renderProfile;
-function renderProfileUpgraded() {
-  _origRenderProfile();
-  const joined = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
-  const joinedEl = document.getElementById("dash-joined");
-  if (joinedEl && joined) {
-    joinedEl.textContent = `חבר מ: ${joined.toLocaleDateString("he-IL")}`;
-  }
-}
-
 /* ── Confirm before sign out ── */
-const _origDoSignOut = doSignOut;
 window.doSignOut = function() {
   if (!confirm("להתנתק?")) return;
   signOut(auth); toast("👋 להתראות!");
 };
 
-/* re-export to window after all upgrades */
+/* ── re-export to window ── */
 Object.assign(window, {
   exportLinks, importLinks, duplicateLink, showQR,
   onLinkSearch, setSortMode, bulkDelete, bulkToggle, clearSelection,
