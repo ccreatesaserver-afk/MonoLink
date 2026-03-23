@@ -1,1 +1,1117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Stop — LinkHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
 
+  <style>
+    /* ── CSS Variables ───────────────────────────────────────────── */
+    :root {
+      --bg:          #080b10;
+      --surface:     #0e1420;
+      --surface2:    #141c2e;
+      --border:      rgba(255,255,255,0.07);
+      --border-glow: rgba(99,179,237,0.35);
+      --text:        #e8edf5;
+      --text-muted:  #6b7a96;
+      --accent:      #63b3ed;
+      --accent2:     #9f7aea;
+      --accent3:     #f6ad55;
+      --danger:      #fc8181;
+      --success:     #68d391;
+      --gradient:    linear-gradient(135deg, #63b3ed 0%, #9f7aea 50%, #f6ad55 100%);
+      --glow:        0 0 40px rgba(99,179,237,0.15);
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --radius:      16px;
+      --radius-sm:   10px;
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --transition:  all 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, textarea, select {
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,179,237,0.15);
+    }
+
+    /* ── Noise overlay ───────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999;
+    }
+
+    /* ── Animated background blobs ───────────────────────────────── */
+    .bg-blobs {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.12;
+      animation: blobFloat 12s ease-in-out infinite;
+    }
+    .blob-1 { width: 600px; height: 600px; background: #63b3ed; top: -200px; left: -100px; animation-delay: 0s; }
+    .blob-2 { width: 500px; height: 500px; background: #9f7aea; bottom: -150px; right: -100px; animation-delay: -4s; }
+    .blob-3 { width: 400px; height: 400px; background: #f6ad55; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -8s; }
+    @keyframes blobFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(30px,-20px) scale(1.05); }
+      66%      { transform: translate(-20px,30px) scale(0.95); }
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────── */
+    .app { position: relative; z-index: 1; }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(8,11,16,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem; font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-logo span { font-weight: 400; opacity: 0.7; }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.2rem; border-radius: var(--radius-sm);
+      font-size: 0.9rem; font-weight: 500;
+      transition: var(--transition);
+    }
+    .btn-primary {
+      background: var(--gradient);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99,179,237,0.3);
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,179,237,0.4); }
+    .btn-ghost {
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--border-glow); background: var(--surface); }
+    .btn-danger { background: rgba(252,129,129,0.15); color: var(--danger); border: 1px solid rgba(252,129,129,0.3); }
+    .btn-danger:hover { background: rgba(252,129,129,0.25); }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    .btn-icon { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 50%; }
+
+    /* ── Avatar ──────────────────────────────────────────────────── */
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      object-fit: cover; border: 2px solid var(--border-glow);
+      transition: var(--transition);
+    }
+    .avatar:hover { border-color: var(--accent); }
+    .avatar-lg {
+      width: 90px; height: 90px; border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid transparent;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                  var(--gradient) border-box;
+    }
+    .avatar-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.8rem; font-weight: 800;
+      background: var(--gradient); color: #fff;
+    }
+
+    /* ── Pages / Screens ─────────────────────────────────────────── */
+    .page { display: none; min-height: calc(100vh - 65px); }
+    .page.active { display: block; }
+
+    /* ─────────────────────────────────────────────────────────────
+       PAGE: LOGIN
+    ───────────────────────────────────────────────────────────── */
+    #page-login {
+      display: flex; align-items: center; justify-content: center;
+      min-height: calc(100vh - 65px); padding: 2rem;
+    }
+    #page-login.active { display: flex; }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      max-width: 420px; width: 100%;
+      text-align: center;
+      box-shadow: var(--card-shadow), var(--glow);
+      animation: fadeInUp 0.5s ease both;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .login-icon {
+      width: 72px; height: 72px; margin: 0 auto 1.5rem;
+      border-radius: 20px;
+      background: var(--gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+    }
+    .login-title {
+      font-family: var(--font-display); font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
+    }
+    .login-sub { color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
+    .btn-google {
+      width: 100%; padding: 0.9rem; border-radius: var(--radius-sm);
+      background: #fff; color: #333;
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      font-size: 1rem; font-weight: 500;
+      transition: var(--transition);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .btn-google:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+    .btn-google svg { width: 20px; height: 20px; }
+    .login-features {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 2rem;
+    }
+    .feature-pill {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0.75rem;
+      font-size: 0.8rem; color: var(--text-muted);
+      display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    }
+    .feature-pill .icon { font-size: 1.2rem; }
+
+    /* ─────────────────────────────────────────────────────────────
+       PAGE: DASHBOARD (Editor)
+    ───────────────────────────────────────────────────────────── */
+    #page-dashboard { padding: 2rem; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 2rem; max-width: 1100px; margin: 0 auto;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Profile panel ───────────────────────────────────────────── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    .panel-title {
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .profile-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .profile-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+    .profile-email { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+    .stat-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0.85rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;
+      background: var(--gradient); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    /* ── Links editor ────────────────────────────────────────────── */
+    .links-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;
+    }
+    .links-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .link-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      transition: var(--transition);
+      animation: fadeInUp 0.3s ease both;
+    }
+    .link-card:hover { border-color: var(--border-glow); box-shadow: var(--glow); }
+    .link-card.dragging { opacity: 0.5; border-style: dashed; }
+    .drag-handle {
+      color: var(--text-muted); cursor: grab; padding: 0.25rem;
+      display: flex; align-items: center;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .link-emoji {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--gradient); display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .link-info { flex: 1; min-width: 0; }
+    .link-title-text { font-weight: 500; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-url-text { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-actions { display: flex; gap: 0.4rem; }
+    .link-toggle {
+      width: 36px; height: 20px; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      position: relative; transition: var(--transition); cursor: pointer;
+    }
+    .link-toggle.on { background: var(--accent); border-color: var(--accent); }
+    .link-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+      transition: var(--transition);
+    }
+    .link-toggle.on::after { transform: translateX(16px); }
+
+    /* ── Add/Edit modal ──────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border-glow);
+      border-radius: 20px; padding: 2rem; width: 100%; max-width: 480px;
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: var(--card-shadow), var(--glow);
+    }
+    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .modal-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { font-size: 0.82rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; display: block; }
+    .emoji-picker-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .emoji-opt {
+      width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer; transition: var(--transition);
+    }
+    .emoji-opt:hover, .emoji-opt.selected { border-color: var(--accent); background: rgba(99,179,237,0.15); }
+    .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+    /* ─────────────────────────────────────────────────────────────
+       PAGE: PUBLIC VIEW
+    ───────────────────────────────────────────────────────────── */
+    #page-public { padding: 2rem 1rem; }
+    #page-public.active { display: flex; justify-content: center; }
+    .public-container { max-width: 480px; width: 100%; }
+    .public-hero { text-align: center; margin-bottom: 2rem; padding-top: 1rem; }
+    .public-avatar { margin: 0 auto 1rem; }
+    .public-name {
+      font-family: var(--font-display); font-size: 1.8rem; font-weight: 800;
+      background: var(--gradient); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3rem;
+    }
+    .public-bio { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+    .public-links { display: flex; flex-direction: column; gap: 0.85rem; }
+    .public-link-btn {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.25rem;
+      font-size: 1rem; font-weight: 500; color: var(--text);
+      transition: var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .public-link-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--gradient); opacity: 0; transition: opacity 0.25s;
+    }
+    .public-link-btn:hover { transform: translateY(-2px); border-color: var(--border-glow); box-shadow: 0 8px 32px rgba(99,179,237,0.2); }
+    .public-link-btn:hover::before { opacity: 0.06; }
+    .public-link-btn .link-emoji { position: relative; z-index: 1; }
+    .public-link-btn .link-title-text { position: relative; z-index: 1; }
+    .public-link-arrow { margin-right: auto; color: var(--text-muted); position: relative; z-index: 1; }
+    .powered-by { text-align: center; margin-top: 2.5rem; color: var(--text-muted); font-size: 0.78rem; }
+    .powered-by span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; }
+
+    /* ─────────────────────────────────────────────────────────────
+       PAGE: ANALYTICS
+    ───────────────────────────────────────────────────────────── */
+    #page-analytics { padding: 2rem; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+    .analytics-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      animation: fadeInUp 0.4s ease both;
+    }
+    .analytics-card:nth-child(1) { animation-delay: 0.05s; }
+    .analytics-card:nth-child(2) { animation-delay: 0.1s; }
+    .analytics-card:nth-child(3) { animation-delay: 0.15s; }
+    .analytics-card:nth-child(4) { animation-delay: 0.2s; }
+    .analytics-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .analytics-value {
+      font-family: var(--font-display); font-size: 2rem; font-weight: 800;
+      background: var(--gradient); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .analytics-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .analytics-trend { font-size: 0.78rem; color: var(--success); margin-top: 0.3rem; }
+
+    /* Bar chart rows */
+    .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; max-width: 900px; margin: 0 auto 1.5rem; }
+    .chart-title { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .bar-label { width: 130px; font-size: 0.85rem; color: var(--text-muted); text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; background: var(--gradient); transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+    .bar-count { font-size: 0.82rem; color: var(--text-muted); width: 30px; flex-shrink: 0; }
+
+    /* ── Toast ───────────────────────────────────────────────────── */
+    .toast-container {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      z-index: 500; display: flex; flex-direction: column; gap: 0.5rem; align-items: center;
+    }
+    .toast {
+      background: var(--surface2); border: 1px solid var(--border-glow);
+      border-radius: 10px; padding: 0.75rem 1.25rem;
+      font-size: 0.9rem; box-shadow: var(--card-shadow);
+      animation: toastIn 0.3s ease;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Loading spinner ─────────────────────────────────────────── */
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Tabs ────────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.75rem; }
+    .tab {
+      padding: 0.55rem 1.1rem; border-radius: var(--radius-sm);
+      font-size: 0.88rem; font-weight: 500; color: var(--text-muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      transition: var(--transition); cursor: pointer;
+    }
+    .tab.active { background: var(--gradient); color: #fff; border-color: transparent; }
+    .tab:hover:not(.active) { border-color: var(--border-glow); color: var(--text); }
+
+    /* ── Badge ───────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block; padding: 0.2rem 0.55rem;
+      border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-success { background: rgba(104,211,145,0.15); color: var(--success); }
+    .badge-warning { background: rgba(246,173,85,0.15); color: var(--accent3); }
+
+    /* ── Empty state ─────────────────────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem; color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state p { max-width: 260px; margin: 0 auto 1.5rem; line-height: 1.6; }
+
+    /* ── Share banner ────────────────────────────────────────────── */
+    .share-banner {
+      background: linear-gradient(135deg, rgba(99,179,237,0.1), rgba(159,122,234,0.1));
+      border: 1px solid rgba(99,179,237,0.2);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .share-url {
+      font-size: 0.85rem; color: var(--accent);
+      font-family: monospace; letter-spacing: 0.02em;
+    }
+    .share-actions { display: flex; gap: 0.5rem; }
+
+    /* ── Theme selector ──────────────────────────────────────────── */
+    .theme-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .theme-dot {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: var(--transition);
+    }
+    .theme-dot.selected { border-color: var(--text); transform: scale(1.2); }
+
+    /* ── Responsive util ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .nav { padding: 0.75rem 1rem; }
+      .nav-logo { font-size: 1.1rem; }
+      #page-dashboard { padding: 1rem; }
+      .modal { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="app">
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">Quick<span>Stop</span> ⚡</div>
+    <div class="nav-actions" id="nav-actions">
+      <!-- populated by JS -->
+    </div>
+  </nav>
+
+  <!-- PAGE: LOGIN -->
+  <section class="page active" id="page-login">
+    <div class="login-card">
+      <div class="login-icon">⚡</div>
+      <h1 class="login-title">Quick Stop</h1>
+      <p class="login-sub">צור את דף הלינקים שלך תוך שניות.<br/>כנס עם Google ותתחיל.</p>
+      <button class="btn-google" id="btn-google-login">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        כניסה עם Google
+      </button>
+      <div class="login-features">
+        <div class="feature-pill"><span class="icon">🔗</span>לינקים ללא הגבלה</div>
+        <div class="feature-pill"><span class="icon">📊</span>אנליטיקס בזמן אמת</div>
+        <div class="feature-pill"><span class="icon">✏️</span>עריכה קלה</div>
+        <div class="feature-pill"><span class="icon">🎨</span>עיצוב מותאם</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE: DASHBOARD -->
+  <section class="page" id="page-dashboard">
+    <div class="dashboard-grid">
+      <!-- LEFT: Profile + Stats -->
+      <aside>
+        <div class="panel" style="margin-bottom:1rem;">
+          <div class="panel-title">👤 הפרופיל שלי</div>
+          <div class="profile-header">
+            <div class="avatar-lg avatar-placeholder" id="dash-avatar" style="width:64px;height:64px;font-size:1.3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;">?</div>
+            <div>
+              <div class="profile-name" id="dash-name">—</div>
+              <div class="profile-email" id="dash-email">—</div>
+              <span class="badge badge-success" style="margin-top:0.3rem;">פעיל ✓</span>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-num" id="stat-links">0</div>
+              <div class="stat-label">לינקים</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="stat-clicks">0</div>
+              <div class="stat-label">קליקים</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="stat-views">0</div>
+              <div class="stat-label">צפיות</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share URL -->
+        <div class="panel" style="margin-bottom:1rem;">
+          <div class="panel-title">🔗 קישור שלך</div>
+          <div class="share-url" id="share-url-text">quickstop.app/u/—</div>
+          <div class="share-actions" style="margin-top:0.75rem;">
+            <button class="btn btn-ghost btn-sm" onclick="copyShareUrl()">📋 העתק</button>
+            <button class="btn btn-primary btn-sm" onclick="showPage('public')">👁 תצוגה מקדימה</button>
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <div class="panel" style="margin-bottom:1rem;">
+          <div class="panel-title">🎨 ערכת צבעים</div>
+          <div class="theme-grid" id="theme-grid"></div>
+        </div>
+
+        <!-- Settings -->
+        <div class="panel">
+          <div class="panel-title">⚙️ הגדרות</div>
+          <div class="form-group">
+            <label class="form-label">ביו / תיאור</label>
+            <textarea id="bio-input" rows="3" placeholder="כמה מילים עליך..." style="resize:vertical;"></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="saveBio()">💾 שמור</button>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Links editor -->
+      <main>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('links',this)">🔗 לינקים</button>
+          <button class="tab" onclick="switchTab('analytics',this)">📊 אנליטיקס</button>
+        </div>
+
+        <!-- Tab: Links -->
+        <div id="tab-links">
+          <div class="panel">
+            <div class="links-header">
+              <div class="panel-title" style="margin-bottom:0;">⚡ הלינקים שלי</div>
+              <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ הוסף לינק</button>
+            </div>
+            <div class="links-list" id="links-list">
+              <div class="empty-state">
+                <div class="empty-icon">🔗</div>
+                <p>אין לינקים עדיין. הוסף את הלינק הראשון שלך!</p>
+                <button class="btn btn-primary" onclick="openAddModal()">+ הוסף לינק</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Analytics -->
+        <div id="tab-analytics" style="display:none;">
+          <div class="analytics-grid" id="analytics-cards"></div>
+          <div class="chart-panel">
+            <div class="chart-title">📊 קליקים לפי לינק</div>
+            <div id="clicks-chart"></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">🌍 מקורות תנועה</div>
+            <div id="sources-chart"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- PAGE: PUBLIC VIEW -->
+  <section class="page" id="page-public">
+    <div class="public-container">
+      <!-- back button for preview -->
+      <div style="margin-bottom:1rem;display:flex;justify-content:flex-end;" id="preview-back">
+        <button class="btn btn-ghost btn-sm" onclick="showPage('dashboard')">← חזור לעריכה</button>
+      </div>
+      <div class="public-hero">
+        <div class="avatar-lg avatar-placeholder public-avatar" id="pub-avatar" style="width:90px;height:90px;font-size:1.8rem;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 1rem;">?</div>
+        <div class="public-name" id="pub-name">Quick Stop</div>
+        <div class="public-bio" id="pub-bio"></div>
+      </div>
+      <div class="public-links" id="pub-links"></div>
+      <div class="powered-by">מופעל ע"י <span>Quick Stop ⚡</span></div>
+    </div>
+  </section>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="link-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">הוסף לינק חדש</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">כותרת</label>
+      <input type="text" id="link-title-input" placeholder="לדוגמה: אינסטגרם שלי" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">כתובת URL</label>
+      <input type="url" id="link-url-input" placeholder="https://..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">אייקון</label>
+      <div class="emoji-picker-row" id="emoji-picker"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="saveLink()">💾 שמור</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp }      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  /* ── Firebase config ─────────────────────────────────────────── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAhDh8ZiK_Z-TqRVfXn6c-n8E7-yvGz180",
+    authDomain:        "qick-stop.firebaseapp.com",
+    databaseURL:       "https://qick-stop-default-rtdb.firebaseio.com",
+    projectId:         "qick-stop",
+    storageBucket:     "qick-stop.firebasestorage.app",
+    messagingSenderId: "332568370154",
+    appId:             "1:332568370154:web:dddcad517a4cc23bab7093",
+    measurementId:     "G-4T8J9NFBTQ"
+  };
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  /* ── State ───────────────────────────────────────────────────── */
+  let currentUser  = null;
+  let userLinks    = [];
+  let editingId    = null;
+  let selectedEmoji = "🔗";
+  let analytics    = { totalClicks: 0, totalViews: 0 };
+  let unsubscribe  = null;
+
+  const EMOJIS = ["🔗","🌐","📱","💼","🎨","🎵","📸","🎬","📝","🛒","💬","📧","🐦","📘","▶️","💡","🚀","🌟","🎯","⚡"];
+  const THEMES = [
+    { name:"ocean",   vars:{ "--accent":"#63b3ed","--accent2":"#9f7aea" } },
+    { name:"emerald", vars:{ "--accent":"#68d391","--accent2":"#4fd1c5" } },
+    { name:"sunset",  vars:{ "--accent":"#f6ad55","--accent2":"#fc8181" } },
+    { name:"rose",    vars:{ "--accent":"#f687b3","--accent2":"#ed64a6" } },
+    { name:"violet",  vars:{ "--accent":"#b794f4","--accent2":"#9f7aea" } },
+  ];
+  const THEME_COLORS = ["#63b3ed","#68d391","#f6ad55","#f687b3","#b794f4"];
+  let activeTheme = 0;
+
+  /* ── Expose globals ──────────────────────────────────────────── */
+  window.openAddModal  = openAddModal;
+  window.closeModal    = closeModal;
+  window.saveLink      = saveLink;
+  window.editLink      = editLink;
+  window.deleteLink    = deleteLink;
+  window.toggleLink    = toggleLink;
+  window.showPage      = showPage;
+  window.copyShareUrl  = copyShareUrl;
+  window.switchTab     = switchTab;
+  window.saveBio       = saveBio;
+
+  /* ── Auth listener ───────────────────────────────────────────── */
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      currentUser = user;
+      await ensureUserDoc(user);
+      renderNav(true);
+      listenToUserData(user.uid);
+      showPage("dashboard");
+    } else {
+      currentUser = null;
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+      renderNav(false);
+      showPage("login");
+    }
+  });
+
+  /* ── Google Sign-In ──────────────────────────────────────────── */
+  document.getElementById("btn-google-login").addEventListener("click", async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      toast("❌ שגיאה בכניסה: " + e.message, "error");
+    }
+  });
+
+  /* ── Ensure user document ────────────────────────────────────── */
+  async function ensureUserDoc(user) {
+    const ref  = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        uid:        user.uid,
+        displayName: user.displayName || "משתמש",
+        email:      user.email,
+        photoURL:   user.photoURL || "",
+        bio:        "",
+        links:      [],
+        totalClicks: 0,
+        totalViews:  0,
+        theme:      0,
+        createdAt:  serverTimestamp()
+      });
+    }
+  }
+
+  /* ── Real-time listener ──────────────────────────────────────── */
+  function listenToUserData(uid) {
+    if (unsubscribe) unsubscribe();
+    const ref = doc(db, "users", uid);
+    unsubscribe = onSnapshot(ref, snap => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      userLinks       = data.links   || [];
+      analytics       = { totalClicks: data.totalClicks || 0, totalViews: data.totalViews || 0 };
+      activeTheme     = data.theme   || 0;
+      document.getElementById("bio-input").value = data.bio || "";
+
+      renderDashProfile(data);
+      renderLinksList();
+      renderPublicView(data);
+      renderAnalytics();
+      renderThemeGrid();
+      applyTheme(activeTheme);
+      document.getElementById("stat-links").textContent  = userLinks.length;
+      document.getElementById("stat-clicks").textContent = analytics.totalClicks;
+      document.getElementById("stat-views").textContent  = analytics.totalViews;
+    });
+  }
+
+  /* ── Nav ─────────────────────────────────────────────────────── */
+  function renderNav(loggedIn) {
+    const el = document.getElementById("nav-actions");
+    if (loggedIn) {
+      const img = currentUser.photoURL
+        ? `<img src="${currentUser.photoURL}" class="avatar" alt="avatar" />`
+        : `<div class="avatar avatar-placeholder" style="width:36px;height:36px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--gradient);color:#fff;">${(currentUser.displayName||"?")[0]}</div>`;
+      el.innerHTML = `
+        ${img}
+        <button class="btn btn-ghost btn-sm" onclick="showPage('public')">👁 תצוגה</button>
+        <button class="btn btn-danger btn-sm" onclick="doSignOut()">יציאה</button>
+      `;
+      window.doSignOut = () => signOut(auth);
+    } else {
+      el.innerHTML = "";
+    }
+  }
+
+  /* ── Dashboard profile ───────────────────────────────────────── */
+  function renderDashProfile(data) {
+    document.getElementById("dash-name").textContent  = data.displayName || "—";
+    document.getElementById("dash-email").textContent = data.email       || "—";
+    const slug = (data.displayName || data.uid).toLowerCase().replace(/\s+/g,"_");
+    document.getElementById("share-url-text").textContent = `quickstop.app/u/${slug}`;
+
+    const av = document.getElementById("dash-avatar");
+    if (data.photoURL) {
+      av.innerHTML = `<img src="${data.photoURL}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;" />`;
+    } else {
+      av.textContent = (data.displayName||"?")[0];
+      av.style.background = "var(--gradient)"; av.style.color = "#fff";
+    }
+  }
+
+  /* ── Render links list (dashboard) ──────────────────────────── */
+  function renderLinksList() {
+    const el = document.getElementById("links-list");
+    if (!userLinks.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔗</div><p>אין לינקים עדיין. הוסף את הלינק הראשון שלך!</p><button class="btn btn-primary" onclick="openAddModal()">+ הוסף לינק</button></div>`;
+      return;
+    }
+    el.innerHTML = userLinks.map((link, i) => `
+      <div class="link-card" data-id="${link.id}">
+        <span class="drag-handle" title="גרור לסידור מחדש">⠿</span>
+        <div class="link-emoji">${link.emoji||"🔗"}</div>
+        <div class="link-info">
+          <div class="link-title-text">${escHtml(link.title)}</div>
+          <div class="link-url-text">${escHtml(link.url)}</div>
+        </div>
+        <div class="link-actions">
+          <div class="link-toggle ${link.active!==false?'on':''}" onclick="toggleLink('${link.id}')" title="${link.active!==false?'פעיל':'מושבת'}"></div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="editLink('${link.id}')" title="ערוך">✏️</button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteLink('${link.id}')" title="מחק">🗑</button>
+        </div>
+      </div>
+    `).join("");
+    initDrag();
+  }
+
+  /* ── Public view ─────────────────────────────────────────────── */
+  function renderPublicView(data) {
+    const pub = document.getElementById("pub-name");
+    pub.textContent = data.displayName || "Quick Stop";
+    document.getElementById("pub-bio").textContent = data.bio || "";
+
+    const pav = document.getElementById("pub-avatar");
+    if (data.photoURL) {
+      pav.innerHTML = `<img src="${data.photoURL}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,var(--gradient) border-box;" />`;
+    } else {
+      pav.textContent = (data.displayName||"?")[0];
+    }
+
+    const active = userLinks.filter(l => l.active !== false);
+    const el = document.getElementById("pub-links");
+    if (!active.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔗</div><p>אין לינקים להצגה</p></div>`;
+      return;
+    }
+    el.innerHTML = active.map(link => `
+      <a href="${escHtml(link.url)}" target="_blank" rel="noopener" class="public-link-btn" onclick="recordClick('${link.id}')">
+        <div class="link-emoji">${link.emoji||"🔗"}</div>
+        <span class="link-title-text">${escHtml(link.title)}</span>
+        <span class="public-link-arrow">→</span>
+      </a>
+    `).join("");
+  }
+
+  /* ── Analytics ───────────────────────────────────────────────── */
+  function renderAnalytics() {
+    const grid = document.getElementById("analytics-cards");
+    const cards = [
+      { icon:"👁", val: analytics.totalViews,  label:"צפיות כולל",      trend:"+12% השבוע" },
+      { icon:"🖱", val: analytics.totalClicks, label:"קליקים כולל",     trend:"+8% השבוע"  },
+      { icon:"🔗", val: userLinks.length,       label:"לינקים פעילים",   trend:"" },
+      { icon:"📈", val: analytics.totalViews ? Math.round((analytics.totalClicks/analytics.totalViews)*100)+"%" : "0%", label:"שיעור קליק", trend:"" },
+    ];
+    grid.innerHTML = cards.map((c,i) => `
+      <div class="analytics-card" style="animation-delay:${i*0.06}s">
+        <div class="analytics-icon">${c.icon}</div>
+        <div class="analytics-value">${c.val}</div>
+        <div class="analytics-label">${c.label}</div>
+        ${c.trend ? `<div class="analytics-trend">↑ ${c.trend}</div>` : ""}
+      </div>
+    `).join("");
+
+    // Clicks by link bar chart
+    const chart = document.getElementById("clicks-chart");
+    if (!userLinks.length) { chart.innerHTML = `<div class="empty-state" style="padding:1.5rem"><p>אין נתונים עדיין</p></div>`; }
+    else {
+      const max = Math.max(...userLinks.map(l => l.clicks||0), 1);
+      chart.innerHTML = userLinks.map(l => `
+        <div class="bar-row">
+          <div class="bar-label">${escHtml(l.emoji||"🔗")} ${escHtml(l.title)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((l.clicks||0)/max)*100)}%"></div></div>
+          <div class="bar-count">${l.clicks||0}</div>
+        </div>
+      `).join("");
+    }
+
+    // Sources chart (mock)
+    const sources = [
+      { label:"ישיר",     pct: 45 },
+      { label:"אינסטגרם", pct: 28 },
+      { label:"ביוגרפיה", pct: 16 },
+      { label:"אחר",      pct: 11 },
+    ];
+    document.getElementById("sources-chart").innerHTML = sources.map(s => `
+      <div class="bar-row">
+        <div class="bar-label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${s.pct}%"></div></div>
+        <div class="bar-count">${s.pct}%</div>
+      </div>
+    `).join("");
+  }
+
+  /* ── Theme ───────────────────────────────────────────────────── */
+  function renderThemeGrid() {
+    const el = document.getElementById("theme-grid");
+    el.innerHTML = THEME_COLORS.map((c,i) => `
+      <div class="theme-dot ${i===activeTheme?'selected':''}"
+           style="background:${c}"
+           onclick="pickTheme(${i})" title="${THEMES[i].name}"></div>
+    `).join("");
+    window.pickTheme = async (i) => {
+      activeTheme = i;
+      applyTheme(i);
+      renderThemeGrid();
+      if (currentUser) {
+        await updateDoc(doc(db,"users",currentUser.uid), { theme: i });
+      }
+    };
+  }
+  function applyTheme(i) {
+    const t = THEMES[i];
+    if (!t) return;
+    Object.entries(t.vars).forEach(([k,v]) => document.documentElement.style.setProperty(k, v));
+    // Update gradient
+    document.documentElement.style.setProperty("--gradient",
+      `linear-gradient(135deg, ${t.vars["--accent"]} 0%, ${t.vars["--accent2"]} 100%)`);
+  }
+
+  /* ── Add/Edit modal ──────────────────────────────────────────── */
+  function openAddModal() {
+    editingId     = null;
+    selectedEmoji = "🔗";
+    document.getElementById("modal-title").textContent     = "הוסף לינק חדש";
+    document.getElementById("link-title-input").value      = "";
+    document.getElementById("link-url-input").value        = "";
+    renderEmojiPicker();
+    document.getElementById("link-modal").classList.add("open");
+    document.getElementById("link-title-input").focus();
+  }
+  function editLink(id) {
+    const link = userLinks.find(l => l.id === id);
+    if (!link) return;
+    editingId     = id;
+    selectedEmoji = link.emoji || "🔗";
+    document.getElementById("modal-title").textContent     = "ערוך לינק";
+    document.getElementById("link-title-input").value      = link.title || "";
+    document.getElementById("link-url-input").value        = link.url   || "";
+    renderEmojiPicker();
+    document.getElementById("link-modal").classList.add("open");
+  }
+  function closeModal() {
+    document.getElementById("link-modal").classList.remove("open");
+  }
+  document.getElementById("link-modal").addEventListener("click", e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  function renderEmojiPicker() {
+    const el = document.getElementById("emoji-picker");
+    el.innerHTML = EMOJIS.map(e => `
+      <div class="emoji-opt ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</div>
+    `).join("");
+    window.selectEmoji = (e) => { selectedEmoji = e; renderEmojiPicker(); };
+  }
+
+  async function saveLink() {
+    const title = document.getElementById("link-title-input").value.trim();
+    const url   = document.getElementById("link-url-input").value.trim();
+    if (!title) { toast("⚠️ יש להזין כותרת","warn"); return; }
+    if (!url)   { toast("⚠️ יש להזין כתובת URL","warn"); return; }
+    let finalUrl = url;
+    if (!/^https?:\/\//i.test(finalUrl)) finalUrl = "https://" + finalUrl;
+
+    if (editingId) {
+      userLinks = userLinks.map(l => l.id === editingId
+        ? { ...l, title, url: finalUrl, emoji: selectedEmoji }
+        : l);
+      toast("✅ הלינק עודכן");
+    } else {
+      userLinks.push({ id: genId(), title, url: finalUrl, emoji: selectedEmoji, active: true, clicks: 0, createdAt: Date.now() });
+      toast("✅ הלינק נוסף");
+    }
+    await saveLinks();
+    closeModal();
+    renderLinksList();
+    renderPublicView({ displayName: currentUser?.displayName, photoURL: currentUser?.photoURL, bio: document.getElementById("bio-input").value });
+  }
+
+  async function deleteLink(id) {
+    if (!confirm("למחוק את הלינק?")) return;
+    userLinks = userLinks.filter(l => l.id !== id);
+    await saveLinks();
+    toast("🗑 הלינק נמחק");
+    renderLinksList();
+    renderPublicView({ displayName: currentUser?.displayName, photoURL: currentUser?.photoURL, bio: document.getElementById("bio-input").value });
+  }
+
+  async function toggleLink(id) {
+    userLinks = userLinks.map(l => l.id === id ? { ...l, active: l.active === false } : l);
+    await saveLinks();
+    renderLinksList();
+    renderPublicView({ displayName: currentUser?.displayName, photoURL: currentUser?.photoURL, bio: document.getElementById("bio-input").value });
+  }
+
+  async function saveLinks() {
+    if (!currentUser) return;
+    await updateDoc(doc(db,"users",currentUser.uid), { links: userLinks });
+  }
+
+  /* ── Record click ────────────────────────────────────────────── */
+  window.recordClick = async (id) => {
+    userLinks = userLinks.map(l => l.id === id ? { ...l, clicks: (l.clicks||0)+1 } : l);
+    analytics.totalClicks = (analytics.totalClicks||0) + 1;
+    if (!currentUser) return;
+    await updateDoc(doc(db,"users",currentUser.uid), {
+      links: userLinks,
+      totalClicks: analytics.totalClicks
+    });
+  };
+
+  /* ── Bio save ────────────────────────────────────────────────── */
+  async function saveBio() {
+    if (!currentUser) return;
+    const bio = document.getElementById("bio-input").value.trim();
+    await updateDoc(doc(db,"users",currentUser.uid), { bio });
+    toast("✅ הביו נשמר");
+  }
+
+  /* ── Share URL ───────────────────────────────────────────────── */
+  function copyShareUrl() {
+    const t = document.getElementById("share-url-text").textContent;
+    navigator.clipboard.writeText("https://"+t).then(() => toast("📋 הקישור הועתק!")).catch(()=>toast("לא ניתן להעתיק"));
+  }
+
+  /* ── Pages ───────────────────────────────────────────────────── */
+  function showPage(name) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const map = { login:"page-login", dashboard:"page-dashboard", public:"page-public", analytics:"page-analytics" };
+    const id  = map[name] || "page-"+name;
+    const el  = document.getElementById(id);
+    if (el) el.classList.add("active");
+    // show/hide preview back button
+    const pb = document.getElementById("preview-back");
+    if (pb) pb.style.display = name==="public" && currentUser ? "flex" : "none";
+  }
+
+  /* ── Tabs ────────────────────────────────────────────────────── */
+  window.switchTab = function(name, btn) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-links").style.display     = name==="links"     ? "block" : "none";
+    document.getElementById("tab-analytics").style.display = name==="analytics" ? "block" : "none";
+    if (name==="analytics") renderAnalytics();
+  };
+
+  /* ── Drag-to-reorder ─────────────────────────────────────────── */
+  function initDrag() {
+    const list = document.getElementById("links-list");
+    let dragged = null;
+    list.querySelectorAll(".link-card").forEach(card => {
+      card.setAttribute("draggable","true");
+      card.addEventListener("dragstart", () => { dragged = card; card.classList.add("dragging"); });
+      card.addEventListener("dragend",   () => { card.classList.remove("dragging"); dragged = null; saveOrder(); });
+      card.addEventListener("dragover",  e => { e.preventDefault(); if (dragged && dragged !== card) { const rect = card.getBoundingClientRect(); const mid  = rect.top + rect.height/2; card.parentNode.insertBefore(dragged, e.clientY < mid ? card : card.nextSibling); }});
+    });
+  }
+  async function saveOrder() {
+    const ids = [...document.querySelectorAll(".link-card")].map(el => el.dataset.id);
+    userLinks = ids.map(id => userLinks.find(l => l.id===id)).filter(Boolean);
+    await saveLinks();
+  }
+
+  /* ── Utils ───────────────────────────────────────────────────── */
+  function genId() { return Math.random().toString(36).slice(2,10); }
+  function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  /* ── Toast ───────────────────────────────────────────────────── */
+  function toast(msg, type="ok") {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = msg;
+    if (type==="error") el.style.borderColor = "var(--danger)";
+    if (type==="warn")  el.style.borderColor = "var(--accent3)";
+    const cont = document.getElementById("toast-container");
+    cont.appendChild(el);
+    setTimeout(() => { el.style.opacity="0"; el.style.transition="opacity 0.3s"; setTimeout(()=>el.remove(), 300); }, 2800);
+  }
+
+  /* keyboard shortcuts */
+  document.addEventListener("keydown", e => {
+    if (e.key==="Escape") closeModal();
+    if (e.key==="n" && e.metaKey && currentUser) { e.preventDefault(); openAddModal(); }
+  });
+</script>
+</body>
+</html>
