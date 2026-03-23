@@ -1370,6 +1370,56 @@ const THEMES = [
 /* ──────────────────────────────────────────────────────────────
    AUTH STATE
 ────────────────────────────────────────────────────────────── */
+function hideLoader() { /* loading screen removed */ }
+
+/* ── listenDocUpgraded — must be defined BEFORE onAuthStateChanged ── */
+function listenDocUpgraded(uid_param) {
+  if (unsub) unsub();
+  const ref = doc(db, "users", uid_param);
+  let firstLoad = true;
+  unsub = onSnapshot(ref, snap => {
+    if (!snap.exists()) return;
+    userData    = snap.data();
+    links       = userData.links || [];
+    activeTheme = userData.theme || 0;
+
+    applyTheme(activeTheme);
+    renderProfile();
+    // Show joined date
+    const joined = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
+    const joinedEl = document.getElementById("dash-joined");
+    if (joinedEl && joined) {
+      joinedEl.textContent = `חבר מ: ${joined.toLocaleDateString("he-IL")}`;
+    }
+    renderLinksListUpgraded();
+    renderPublicView();
+    renderThemeRow();
+    renderMiniAnalytics();
+    renderFullAnalytics();
+    updateBulkBar();
+    maybeShowOnboarding();
+
+    document.getElementById("settings-name").value = userData.displayName || "";
+    document.getElementById("settings-bio").value  = userData.bio || "";
+    const bioField2 = document.getElementById("settings-bio");
+    if (bioField2) bioField2.dispatchEvent(new Event("input"));
+
+    const slug = slug_of(userData.displayName || user.uid || "user");
+    document.getElementById("share-url").textContent = `monolink.app/u/${slug}`;
+
+    if (firstLoad) {
+      firstLoad = false;
+      animateCountUp("s-links",  links.length,              600);
+      animateCountUp("s-clicks", userData.totalClicks||0,   800);
+      animateCountUp("s-views",  userData.totalViews||0,    1000);
+    } else {
+      document.getElementById("s-links").textContent   = links.length;
+      document.getElementById("s-clicks").textContent  = userData.totalClicks || 0;
+      document.getElementById("s-views").textContent   = userData.totalViews  || 0;
+    }
+  });
+}
+
 onAuthStateChanged(auth, async u => {
   hideLoader();
   if (u) {
@@ -1386,8 +1436,6 @@ onAuthStateChanged(auth, async u => {
     showPage("auth");
   }
 });
-
-function hideLoader() { /* loading screen removed */ }
 
 /* ──────────────────────────────────────────────────────────────
    FIRESTORE — ensure doc
@@ -1541,7 +1589,10 @@ async function doRegister() {
   setLoading("btn-register", true);
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    // Update displayName BEFORE ensureDoc so Firestore gets the real name
     await updateProfile(cred.user, { displayName: name });
+    // Force-refresh the user object so onAuthStateChanged sees the name
+    await ensureDoc({ ...cred.user, displayName: name });
     toast("🎉 ברוך הבא ל-MonoLink!","success");
   } catch(e) {
     showErr(errEl, authErrMsg(e.code));
@@ -2254,55 +2305,6 @@ function animateCountUp(elId, target, duration=800) {
     else el.textContent = target;
   };
   requestAnimationFrame(tick);
-}
-
-/* Override listenDoc to trigger count-up on first load */
-const _origListenDoc = listenDoc;
-function listenDocUpgraded(uid_param) {
-  if (unsub) unsub();
-  const ref = doc(db, "users", uid_param);
-  let firstLoad = true;
-  unsub = onSnapshot(ref, snap => {
-    if (!snap.exists()) return;
-    userData    = snap.data();
-    links       = userData.links || [];
-    activeTheme = userData.theme || 0;
-
-    applyTheme(activeTheme);
-    renderProfile();
-    // Show joined date
-    const joined = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
-    const joinedEl = document.getElementById("dash-joined");
-    if (joinedEl && joined) {
-      joinedEl.textContent = `חבר מ: ${joined.toLocaleDateString("he-IL")}`;
-    }
-    renderLinksListUpgraded();
-    renderPublicView();
-    renderThemeRow();
-    renderMiniAnalytics();
-    renderFullAnalytics();
-    updateBulkBar();
-
-    document.getElementById("settings-name").value = userData.displayName || "";
-    document.getElementById("settings-bio").value  = userData.bio || "";
-    // update bio counter
-    const bioField2 = document.getElementById("settings-bio");
-    if (bioField2) bioField2.dispatchEvent(new Event("input"));
-
-    const slug = slug_of(userData.displayName || user.uid || "user");
-    document.getElementById("share-url").textContent = `monolink.app/u/${slug}`;
-
-    if (firstLoad) {
-      firstLoad = false;
-      animateCountUp("s-links",  links.length,              600);
-      animateCountUp("s-clicks", userData.totalClicks||0,   800);
-      animateCountUp("s-views",  userData.totalViews||0,    1000);
-    } else {
-      document.getElementById("s-links").textContent   = links.length;
-      document.getElementById("s-clicks").textContent  = userData.totalClicks || 0;
-      document.getElementById("s-views").textContent   = userData.totalViews  || 0;
-    }
-  });
 }
 
 /* ── Onboarding tooltip (first visit) ── */
