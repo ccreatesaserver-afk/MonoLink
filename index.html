@@ -827,39 +827,7 @@ img { display:block; }
 .toast.warn    { border-color:rgba(255,217,61,0.4); background:rgba(255,217,61,0.08); }
 .toast.success { border-color:rgba(0,255,159,0.35); background:rgba(0,255,159,0.08); }
 
-/* ═══════════════════════════════════════════════════════════════
-   LOADING SCREEN
-═══════════════════════════════════════════════════════════════ */
-#loading-screen {
-  position:fixed; inset:0; z-index:800;
-  background:var(--bg);
-  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1.25rem;
-  transition:opacity 0.4s;
-}
-#loading-screen.fade-out { opacity:0; pointer-events:none; }
-.loading-logo {
-  width:64px; height:64px; border-radius:16px;
-  animation:logoPulse 1.5s ease-in-out infinite;
-  object-fit:contain;
-}
-.loading-text {
-  font-family:var(--font-display); font-size:0.8rem; color:var(--text-muted);
-  letter-spacing:0.2em; text-transform:uppercase;
-  animation:textBlink 1.2s ease-in-out infinite;
-}
-@keyframes textBlink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-.loading-bar {
-  width:200px; height:2px; background:var(--surface2); border-radius:1px; overflow:hidden;
-}
-.loading-bar-fill {
-  height:100%; background:var(--grad-main); border-radius:1px;
-  animation:loadBar 1.8s ease-in-out infinite;
-}
-@keyframes loadBar {
-  0%   { width:0; margin-left:0; }
-  50%  { width:60%; margin-left:20%; }
-  100% { width:0; margin-left:100%; }
-}
+/* spinner kept for buttons */
 
 /* ═══════════════════════════════════════════════════════════════
    SPINNER
@@ -939,16 +907,7 @@ img { display:block; }
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
-<div id="loading-screen">
-  <div style="position:relative;width:72px;height:72px;">
-    <img class="loading-logo" src="https://raw.githubusercontent.com/ccreatesaserver-afk/MonoLink/main/monolink.png" alt="MonoLink"
-      onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex'"/>
-    <div id="logo-fallback" style="display:none;width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#00c8ff,#7833ff,#ff2d8a);align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:#fff;box-shadow:0 0 30px rgba(0,200,255,0.4);">M</div>
-  </div>
-  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-  <div class="loading-text">Initializing MonoLink...</div>
-</div>
+
 
 <!-- BACKGROUND -->
 <div class="bg-canvas">
@@ -1396,17 +1355,7 @@ onAuthStateChanged(auth, async u => {
   }
 });
 
-function hideLoader() {
-  const l = document.getElementById("loading-screen");
-  if (!l) return;
-  l.classList.add("fade-out");
-  setTimeout(() => l.remove(), 500);
-}
-// Fallback: hide loader after 6s even if Firebase hangs
-setTimeout(() => {
-  const l = document.getElementById("loading-screen");
-  if (l) { l.classList.add("fade-out"); setTimeout(() => l.remove(), 500); }
-}, 6000);
+function hideLoader() { /* loading screen removed */ }
 
 /* ──────────────────────────────────────────────────────────────
    FIRESTORE — ensure doc
