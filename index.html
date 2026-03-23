@@ -941,7 +941,11 @@ img { display:block; }
 
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
-  <img class="loading-logo" src="https://raw.githubusercontent.com/ccreatesaserver-afk/MonoLink/main/monolink.png" alt="MonoLink" onerror="this.style.display='none'"/>
+  <div style="position:relative;width:72px;height:72px;">
+    <img class="loading-logo" src="https://raw.githubusercontent.com/ccreatesaserver-afk/MonoLink/main/monolink.png" alt="MonoLink"
+      onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex'"/>
+    <div id="logo-fallback" style="display:none;width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#00c8ff,#7833ff,#ff2d8a);align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:#fff;box-shadow:0 0 30px rgba(0,200,255,0.4);">M</div>
+  </div>
   <div class="loading-bar"><div class="loading-bar-fill"></div></div>
   <div class="loading-text">Initializing MonoLink...</div>
 </div>
@@ -959,7 +963,9 @@ img { display:block; }
   <!-- ═══ NAVBAR ═══ -->
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
-      <img class="nav-logo-img" src="https://raw.githubusercontent.com/ccreatesaserver-afk/MonoLink/main/monolink.png" alt="MonoLink" onerror="this.style.display='none'"/>
+      <img class="nav-logo-img" src="https://raw.githubusercontent.com/ccreatesaserver-afk/MonoLink/main/monolink.png" alt="MonoLink"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div style="display:none;width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#00c8ff,#7833ff);align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.8rem;font-weight:900;color:#fff;">M</div>
       <span class="nav-logo-text">MONOLINK</span>
     </div>
     <div class="nav-center" id="nav-center" style="display:none">
@@ -1252,7 +1258,9 @@ img { display:block; }
         <div class="pub-avatar-wrap">
           <div class="pub-avatar-ring"></div>
           <div class="pub-avatar-ring-inner"></div>
-          <div class="pub-avatar-ph" id="pub-av">?</div>
+          <div id="pub-av-container">
+            <div class="pub-avatar-ph" id="pub-av">?</div>
+          </div>
         </div>
         <div class="pub-name" id="pub-name">—</div>
         <div class="pub-bio" id="pub-bio"></div>
@@ -1390,9 +1398,15 @@ onAuthStateChanged(auth, async u => {
 
 function hideLoader() {
   const l = document.getElementById("loading-screen");
+  if (!l) return;
   l.classList.add("fade-out");
   setTimeout(() => l.remove(), 500);
 }
+// Fallback: hide loader after 6s even if Firebase hangs
+setTimeout(() => {
+  const l = document.getElementById("loading-screen");
+  if (l) { l.classList.add("fade-out"); setTimeout(() => l.remove(), 500); }
+}, 6000);
 
 /* ──────────────────────────────────────────────────────────────
    FIRESTORE — ensure doc
@@ -1498,17 +1512,20 @@ function switchAuthTab(tab) {
   document.getElementById("form-register").style.display = tab==="register" ? "block" : "none";
   document.getElementById("atab-login").classList.toggle("active",    tab==="login");
   document.getElementById("atab-register").classList.toggle("active", tab==="register");
+  // Clear errors when switching tabs
+  document.getElementById("login-error").classList.remove("show");
+  document.getElementById("reg-error").classList.remove("show");
   showPage("auth");
 }
 
 function setLoading(btnId, on) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
+  if (on && !btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
   btn.classList.toggle("btn-loading", on);
   btn.innerHTML = on
     ? `<div class="spinner"></div><span>רגע...</span>`
-    : btn.dataset.orig || btn.innerHTML;
-  if (!on && btn.dataset.orig) btn.innerHTML = btn.dataset.orig;
+    : (btn.dataset.orig || btn.innerHTML);
 }
 function initBtn(btnId, label) {
   const btn = document.getElementById(btnId);
@@ -1671,11 +1688,11 @@ function renderPublicView() {
   document.getElementById("pub-name").textContent = userData.displayName || "MonoLink";
   document.getElementById("pub-bio").textContent  = userData.bio || "";
 
-  const av = document.getElementById("pub-av");
+  const avContainer = document.getElementById("pub-av-container");
   if (userData.photoURL) {
-    av.outerHTML = `<img class="pub-avatar-img" id="pub-av" src="${userData.photoURL}" alt="avatar"/>`;
+    avContainer.innerHTML = `<img class="pub-avatar-img" src="${userData.photoURL}" alt="avatar"/>`;
   } else {
-    av.textContent = (userData.displayName||"?")[0].toUpperCase();
+    avContainer.innerHTML = `<div class="pub-avatar-ph" id="pub-av">${(userData.displayName||"?")[0].toUpperCase()}</div>`;
   }
 
   // back bar (only when logged in)
@@ -1730,11 +1747,11 @@ function renderKPIs() {
 }
 function renderWeeklyChart() {
   const days   = ["א","ב","ג","ד","ה","ו","ש"];
-  const weekly = userData.weeklyClicks || [0,0,0,0,0,0,0];
+  const weekly = Array.from({length:7}, (_,i) => (userData.weeklyClicks||[])[i] || 0);
   const mx     = Math.max(...weekly, 1);
   const wc     = document.getElementById("weekly-chart");
   const wl     = document.getElementById("week-labels");
-  wc.innerHTML = weekly.map((v,i) => `<div class="week-bar" style="height:${Math.round((v/mx)*100)}%;" title="${v} קליקים"></div>`).join("");
+  wc.innerHTML = weekly.map((v,i) => `<div class="week-bar" style="height:${Math.max(4,Math.round((v/mx)*76))}px;" title="${v} קליקים"></div>`).join("");
   wl.innerHTML = days.map(d => `<div class="week-lbl">${d}</div>`).join("");
 }
 function renderClicksBars() {
@@ -1751,13 +1768,13 @@ function renderClicksBars() {
 }
 function renderSourceBars() {
   const sources = [
-    {lbl:"ישיר",40},{lbl:"אינסטגרם",28},{lbl:"ביוגרפיה",16},{lbl:"טיקטוק",10},{lbl:"אחר",6}
+    {lbl:"ישיר",val:40},{lbl:"אינסטגרם",val:28},{lbl:"ביוגרפיה",val:16},{lbl:"טיקטוק",val:10},{lbl:"אחר",val:6}
   ];
   document.getElementById("source-bars").innerHTML = sources.map(s => `
     <div class="bar-row">
       <div class="bar-lbl">${s.lbl}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${s[1]}%"></div></div>
-      <div class="bar-num">${s[1]}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${s.val}%"></div></div>
+      <div class="bar-num">${s.val}%</div>
     </div>
   `).join("");
 }
@@ -1900,7 +1917,7 @@ async function deleteLink(id) {
 }
 
 async function toggleLink(id) {
-  links = links.map(l => l.id===id ? {...l, active: l.active===false} : l);
+  links = links.map(l => l.id===id ? {...l, active: l.active===false ? true : false} : l);
   await updateDoc(doc(db,"users",user.uid), { links });
 }
 
@@ -1950,7 +1967,7 @@ window.recClick = async id => {
   if (!user) return;
   links = links.map(l => l.id===id ? {...l, clicks:(l.clicks||0)+1} : l);
   const today  = new Date().getDay(); // 0=Sun
-  const weekly = [...(userData.weeklyClicks||[0,0,0,0,0,0,0])];
+  const weekly = Array.from({length:7}, (_,i) => (userData.weeklyClicks||[])[i] || 0);
   weekly[today] = (weekly[today]||0)+1;
   await updateDoc(doc(db,"users",user.uid), {
     links,
@@ -2012,7 +2029,6 @@ function esc(s) {
 }
 function slug_of(name) {
   return String(name).toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
-}
-</script>
+}</script>
 </body>
 </html>
