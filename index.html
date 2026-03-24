@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:ital,wght@0,200;0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -83,9 +81,6 @@ input:focus,textarea:focus,select:focus {
 input::placeholder,textarea::placeholder { color:var(--text-muted); }
 img { display:block; }
 
-/* ═══════════════════════════════════════════════════════════════
-   CUSTOM SCROLLBAR
-═══════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:var(--bg); }
 ::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:3px; }
@@ -114,16 +109,12 @@ img { display:block; }
 .bg-scanlines {
   position:absolute; inset:0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,200,255,0.015) 2px, rgba(0,200,255,0.015) 4px);
-  pointer-events:none;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   APP WRAPPER
-═══════════════════════════════════════════════════════════════ */
 .app { position:relative; z-index:1; min-height:100vh; }
 
 /* ═══════════════════════════════════════════════════════════════
-   NAVIGATION BAR
+   NAVBAR
 ═══════════════════════════════════════════════════════════════ */
 .navbar {
   position:sticky; top:0; z-index:200;
@@ -204,20 +195,15 @@ img { display:block; }
   transition:opacity 0.3s; z-index:-1;
 }
 .btn-glow:hover::after { opacity:0.5; }
+.mt-1 { margin-top:0.75rem; }
 .mt-2 { margin-top:1rem; }
 
-/* ═══════════════════════════════════════════════════════════════
-   SPINNER
-═══════════════════════════════════════════════════════════════ */
 .spinner {
   width:16px; height:16px; border:2px solid rgba(255,255,255,0.3);
   border-top-color:#fff; border-radius:50%; animation:spin 0.6s linear infinite; flex-shrink:0;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* ═══════════════════════════════════════════════════════════════
-   BADGES
-═══════════════════════════════════════════════════════════════ */
 .badge {
   display:inline-flex; align-items:center; gap:0.3rem;
   padding:0.2rem 0.55rem; border-radius:20px;
@@ -238,7 +224,7 @@ img { display:block; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AUTH PAGE — SPLIT LAYOUT
+   AUTH PAGE
 ═══════════════════════════════════════════════════════════════ */
 #page-auth { display:grid; grid-template-columns:1fr 1fr; min-height:calc(100vh - 64px); }
 #page-auth.active { display:grid; }
@@ -299,17 +285,6 @@ img { display:block; }
 .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
 .divider-text { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; }
 
-.btn-google {
-  width:100%; padding:0.85rem; border-radius:var(--radius-sm);
-  background:#fff; color:#3c4043;
-  display:flex; align-items:center; justify-content:center; gap:0.85rem;
-  font-size:0.95rem; font-weight:600; transition:var(--transition);
-  box-shadow:0 2px 12px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1);
-  cursor:pointer;
-}
-.btn-google:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.5); }
-.btn-google svg { width:20px; height:20px; flex-shrink:0; }
-
 .auth-error {
   background:rgba(255,69,69,0.1); border:1px solid rgba(255,69,69,0.3);
   border-radius:var(--radius-xs); padding:0.7rem 0.9rem;
@@ -333,7 +308,7 @@ img { display:block; }
 .forgot-link:hover { text-decoration:underline; }
 .terms-text { font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:1rem; line-height:1.5; }
 
-/* ── Password strength ── */
+/* Password strength */
 .pw-strength { display:flex; gap:4px; margin-top:0.5rem; height:4px; }
 .pw-seg { flex:1; border-radius:2px; background:var(--surface3); transition:background 0.3s; }
 .pw-seg.fill-1 { background:var(--danger); }
@@ -343,28 +318,6 @@ img { display:block; }
 .text-muted { color:var(--text-muted); }
 .text-sm    { font-size:0.8rem; }
 .pw-lbl     { font-size:0.75rem; margin-top:0.3rem; min-height:1.1em; }
-
-/* ── OTP / verification box ── */
-.otp-box {
-  background:rgba(0,200,255,0.06); border:1px solid rgba(0,200,255,0.25);
-  border-radius:var(--radius-sm); padding:1.25rem 1rem;
-  text-align:center; margin-bottom:1rem;
-}
-.otp-title { font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:0.3rem; }
-.otp-sub   { font-size:0.78rem; color:var(--text-dim); margin-bottom:1rem; }
-.otp-inputs { display:flex; justify-content:center; gap:0.5rem; margin-bottom:0.75rem; }
-.otp-input {
-  width:44px; height:52px; text-align:center; font-size:1.4rem; font-weight:700;
-  font-family:var(--font-display); letter-spacing:0;
-  background:var(--surface2); border:2px solid var(--border);
-  border-radius:var(--radius-xs); color:var(--text);
-  padding:0; transition:var(--transition);
-}
-.otp-input:focus { border-color:var(--cyan); box-shadow:var(--glow-cyan); }
-.otp-input.filled { border-color:rgba(0,200,255,0.5); }
-.otp-resend { font-size:0.78rem; color:var(--text-muted); }
-.otp-resend span { color:var(--cyan); cursor:pointer; }
-.otp-resend span:hover { text-decoration:underline; }
 
 /* ═══════════════════════════════════════════════════════════════
    DASHBOARD
@@ -495,7 +448,6 @@ img { display:block; }
 .empty-title { font-family:var(--font-display); font-size:0.9rem; color:var(--text-dim); margin-bottom:0.5rem; letter-spacing:0.06em; }
 .empty-sub { font-size:0.83rem; color:var(--text-muted); margin-bottom:1.5rem; }
 
-/* sort/bulk row */
 .sort-btn { padding:0.3rem 0.7rem; border-radius:var(--radius-xs); font-size:0.75rem; font-weight:600; color:var(--text-muted); background:var(--surface2); border:1px solid var(--border); cursor:pointer; transition:var(--transition); }
 .sort-btn:hover { color:var(--text); border-color:var(--border-glow); }
 .sort-btn.active { color:var(--cyan); border-color:rgba(0,200,255,0.4); background:rgba(0,200,255,0.08); }
@@ -555,14 +507,16 @@ img { display:block; }
 .pub-name { font-family:var(--font-display); font-size:1.7rem; font-weight:900; background:var(--grad-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:0.4rem; letter-spacing:0.05em; }
 .pub-bio { color:var(--text-dim); font-size:0.9rem; line-height:1.65; max-width:320px; margin:0 auto; }
 .pub-links { display:flex; flex-direction:column; gap:0.8rem; }
+
 .pub-link-item {
   display:flex; align-items:center; gap:0.9rem;
   background:var(--surface); border:1px solid var(--border);
   border-radius:14px; padding:0.95rem 1.2rem;
   font-weight:500; color:var(--text); transition:var(--transition); position:relative; overflow:hidden;
+  cursor:pointer;
 }
 .pub-link-item::before { content:''; position:absolute; inset:0; background:var(--grad-main); opacity:0; transition:opacity 0.25s; }
-.pub-link-item:hover { border-color:rgba(0,200,255,0.35); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,200,255,0.15), 0 8px 32px rgba(120,51,255,0.1); }
+.pub-link-item:hover { border-color:rgba(0,200,255,0.35); transform:translateY(-3px); box-shadow:0 10px 40px rgba(0,200,255,0.18), 0 10px 40px rgba(120,51,255,0.12); }
 .pub-link-item:hover::before { opacity:0.07; }
 .pub-link-item:active { transform:scale(0.98) translateY(0); }
 .pub-link-icon { position:relative; z-index:1; font-size:1.3rem; flex-shrink:0; }
@@ -586,7 +540,6 @@ img { display:block; }
   box-shadow:var(--shadow-deep); position:relative; overflow:hidden; animation:fadeUp 0.4s var(--ease) both;
 }
 .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--grad-main); opacity:0.4; }
-.kpi-card:nth-child(1){animation-delay:0.0s;} .kpi-card:nth-child(2){animation-delay:0.07s;} .kpi-card:nth-child(3){animation-delay:0.14s;} .kpi-card:nth-child(4){animation-delay:0.21s;}
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 .kpi-icon { font-size:1.4rem; margin-bottom:0.6rem; }
 .kpi-val { font-family:var(--font-display); font-size:2.2rem; font-weight:900; background:var(--grad-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
@@ -628,28 +581,15 @@ img { display:block; }
 @keyframes toastIn { from { opacity:0; transform:translateY(12px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
 
 /* ═══════════════════════════════════════════════════════════════
-   UTILITY CLASSES
-═══════════════════════════════════════════════════════════════ */
-.mt-1 { margin-top:0.75rem; }
-
-/* ═══════════════════════════════════════════════════════════════
    LOGIN TRANSITION OVERLAY
 ═══════════════════════════════════════════════════════════════ */
 #login-transition {
   position:fixed; inset:0; z-index:9000;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:var(--bg);
-  pointer-events:none;
-  opacity:0;
-  transition:opacity 0.3s var(--ease);
+  background:var(--bg); pointer-events:none; opacity:0; transition:opacity 0.3s var(--ease);
 }
-#login-transition.active {
-  opacity:1;
-  pointer-events:all;
-}
-#login-transition.exit {
-  animation:transitionExit 0.6s var(--ease) forwards;
-}
+#login-transition.active { opacity:1; pointer-events:all; }
+#login-transition.exit { animation:transitionExit 0.6s var(--ease) forwards; }
 @keyframes transitionExit {
   0%   { opacity:1; clip-path:circle(100% at 50% 50%); }
   100% { opacity:0; clip-path:circle(0% at 50% 50%); }
@@ -661,110 +601,66 @@ img { display:block; }
   letter-spacing:0.12em; margin-bottom:2rem;
   animation:ltLogoPop 0.5s var(--spring) 0.1s both;
 }
-@keyframes ltLogoPop {
-  from { transform:scale(0.6); opacity:0; }
-  to   { transform:scale(1);   opacity:1; }
-}
-.lt-ring {
-  width:80px; height:80px; position:relative; margin-bottom:1.5rem;
-  animation:ltRingIn 0.5s var(--spring) 0.2s both;
-}
-@keyframes ltRingIn {
-  from { transform:scale(0); opacity:0; }
-  to   { transform:scale(1); opacity:1; }
-}
+@keyframes ltLogoPop { from { transform:scale(0.6); opacity:0; } to { transform:scale(1); opacity:1; } }
+.lt-ring { width:80px; height:80px; position:relative; margin-bottom:1.5rem; animation:ltRingIn 0.5s var(--spring) 0.2s both; }
+@keyframes ltRingIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
 .lt-ring::before {
   content:''; position:absolute; inset:0; border-radius:50%;
-  border:3px solid transparent;
-  border-top-color:var(--cyan);
-  border-right-color:var(--violet);
+  border:3px solid transparent; border-top-color:var(--cyan); border-right-color:var(--violet);
   animation:ltSpin 0.9s linear infinite;
 }
 .lt-ring::after {
   content:''; position:absolute; inset:8px; border-radius:50%;
-  border:2px solid transparent;
-  border-bottom-color:var(--pink);
+  border:2px solid transparent; border-bottom-color:var(--pink);
   animation:ltSpin 0.6s linear infinite reverse;
 }
 @keyframes ltSpin { to { transform:rotate(360deg); } }
-.lt-msg {
-  font-size:0.85rem; color:var(--text-dim); letter-spacing:0.08em;
-  text-transform:uppercase;
-  animation:ltMsgIn 0.5s ease 0.35s both;
-}
-@keyframes ltMsgIn {
-  from { opacity:0; transform:translateY(8px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.lt-particles {
-  position:absolute; inset:0; pointer-events:none; overflow:hidden;
-}
-.lt-particle {
-  position:absolute; width:4px; height:4px; border-radius:50%;
-  background:var(--cyan); animation:ltFloat var(--dur,3s) ease-in-out var(--delay,0s) infinite;
-}
-@keyframes ltFloat {
-  0%,100% { transform:translate(0,0) scale(1); opacity:0.6; }
-  50%     { transform:translate(var(--tx,20px), var(--ty,-40px)) scale(1.5); opacity:0.2; }
-}
+.lt-msg { font-size:0.85rem; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; animation:ltMsgIn 0.5s ease 0.35s both; }
+@keyframes ltMsgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.lt-particles { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.lt-particle { position:absolute; width:4px; height:4px; border-radius:50%; background:var(--cyan); animation:ltFloat var(--dur,3s) ease-in-out var(--delay,0s) infinite; }
+@keyframes ltFloat { 0%,100% { transform:translate(0,0) scale(1); opacity:0.6; } 50% { transform:translate(var(--tx,20px), var(--ty,-40px)) scale(1.5); opacity:0.2; } }
 
 /* ═══════════════════════════════════════════════════════════════
-   TERMS / PRIVACY PAGES
+   LEGAL PAGES
 ═══════════════════════════════════════════════════════════════ */
 #page-terms, #page-privacy { padding:2rem 1rem; }
 .legal-wrap { max-width:760px; margin:0 auto; }
 .legal-back { margin-bottom:2rem; }
-.legal-header {
-  text-align:center; margin-bottom:3rem; padding-bottom:2rem;
-  border-bottom:1px solid var(--border);
-}
+.legal-header { text-align:center; margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid var(--border); }
 .legal-icon { font-size:3rem; margin-bottom:1rem; }
 .legal-title {
   font-family:var(--font-display); font-size:2rem; font-weight:900;
-  background:var(--grad-main); -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent; background-clip:text;
+  background:var(--grad-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   letter-spacing:0.06em; margin-bottom:0.5rem;
 }
 .legal-updated { font-size:0.8rem; color:var(--text-muted); }
 .legal-section { margin-bottom:2.5rem; }
 .legal-section-title {
   font-family:var(--font-display); font-size:0.85rem; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.12em;
-  color:var(--cyan); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;
+  text-transform:uppercase; letter-spacing:0.12em; color:var(--cyan); margin-bottom:1rem;
+  display:flex; align-items:center; gap:0.5rem;
 }
-.legal-section-title::before {
-  content:''; display:inline-block; width:8px; height:8px;
-  border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan);
-}
-.legal-p {
-  color:var(--text-dim); font-size:0.9rem; line-height:1.8; margin-bottom:0.75rem;
-}
-.legal-list {
-  list-style:none; padding:0; margin:0.75rem 0;
-}
-.legal-list li {
-  padding:0.5rem 0 0.5rem 1.5rem; font-size:0.88rem; color:var(--text-dim);
-  line-height:1.6; position:relative; border-bottom:1px solid rgba(255,255,255,0.03);
-}
-.legal-list li::before {
-  content:'→'; position:absolute; left:0; color:var(--cyan); font-size:0.8rem;
-}
-.legal-highlight {
-  background:rgba(0,200,255,0.06); border:1px solid rgba(0,200,255,0.2);
-  border-radius:var(--radius-sm); padding:1rem 1.25rem; margin:1rem 0;
-}
+.legal-section-title::before { content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
+.legal-p { color:var(--text-dim); font-size:0.9rem; line-height:1.8; margin-bottom:0.75rem; }
+.legal-list { list-style:none; padding:0; margin:0.75rem 0; }
+.legal-list li { padding:0.5rem 0 0.5rem 1.5rem; font-size:0.88rem; color:var(--text-dim); line-height:1.6; position:relative; border-bottom:1px solid rgba(255,255,255,0.03); }
+.legal-list li::before { content:'→'; position:absolute; left:0; color:var(--cyan); font-size:0.8rem; }
+.legal-highlight { background:rgba(0,200,255,0.06); border:1px solid rgba(0,200,255,0.2); border-radius:var(--radius-sm); padding:1rem 1.25rem; margin:1rem 0; }
 .legal-highlight p { margin:0; color:var(--text); font-size:0.88rem; line-height:1.6; }
-.legal-footer {
-  text-align:center; padding-top:2rem; border-top:1px solid var(--border);
-  color:var(--text-muted); font-size:0.8rem; line-height:1.7;
-}
+.legal-footer { text-align:center; padding-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.8rem; line-height:1.7; }
 .legal-contact { color:var(--cyan); cursor:pointer; }
 .legal-contact:hover { text-decoration:underline; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD — MINI ANALYTICS SECTION
+═══════════════════════════════════════════════════════════════ */
+#page-dashboard .analytics-kpi-grid { grid-template-columns:repeat(4,1fr); }
+@media(max-width:700px) { #page-dashboard .analytics-kpi-grid { grid-template-columns:repeat(2,1fr); } }
 </style>
 </head>
 <body>
 
-<!-- ─── Background ─── -->
 <div class="bg-canvas">
   <div class="bg-grid"></div>
   <div class="bg-orb bg-orb-1"></div>
@@ -790,11 +686,8 @@ img { display:block; }
     </div>
   </nav>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: AUTH
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: AUTH ═══ -->
   <section class="page active" id="page-auth">
-    <!-- Hero side -->
     <div class="auth-hero">
       <div class="auth-shape auth-shape-1"></div>
       <div class="auth-shape auth-shape-2"></div>
@@ -815,8 +708,6 @@ img { display:block; }
         </div>
       </div>
     </div>
-
-    <!-- Form side -->
     <div class="auth-form-side">
       <div class="auth-card">
         <div class="auth-tabs">
@@ -824,7 +715,7 @@ img { display:block; }
           <button class="auth-tab"        id="atab-register" onclick="switchAuthTab('register')">הרשמה</button>
         </div>
 
-        <!-- ── LOGIN FORM ── -->
+        <!-- LOGIN -->
         <div id="form-login">
           <div class="auth-title">ברוך הבא 👋</div>
           <p class="auth-sub">אין לך חשבון? <span onclick="switchAuthTab('register')">הרשמה</span></p>
@@ -839,7 +730,7 @@ img { display:block; }
           <div class="form-field">
             <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
               <span>סיסמה</span>
-              <span class="forgot-link" onclick="doForgotPassword()">שכחתי סיסמה</span>
+              <span class="forgot-link" onclick="showForgotMsg()">שכחתי סיסמה</span>
             </label>
             <div class="input-wrap">
               <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doEmailLogin()"/>
@@ -849,110 +740,60 @@ img { display:block; }
           <button class="btn btn-primary btn-wide btn-glow mt-2" id="btn-login" onclick="doEmailLogin()">
             <span>כניסה</span>
           </button>
-          <div class="divider"><span class="divider-text">או</span></div>
-          <button class="btn-google" id="btn-google-login" onclick="doGoogleLogin()">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            המשך עם Google
-          </button>
           <p class="terms-text">בכניסה אתה מסכים ל<span style="color:var(--cyan);cursor:pointer;" onclick="navGo('terms',null)">תנאי השימוש</span> ו<span style="color:var(--cyan);cursor:pointer;" onclick="navGo('privacy',null)">מדיניות הפרטיות</span></p>
         </div>
 
-        <!-- ── REGISTER FORM ── -->
+        <!-- REGISTER -->
         <div id="form-register" style="display:none">
           <div class="auth-title">צור חשבון 🚀</div>
           <p class="auth-sub">כבר יש לך חשבון? <span onclick="switchAuthTab('login')">כניסה</span></p>
           <div class="auth-error"   id="reg-error"></div>
           <div class="auth-success" id="reg-success"></div>
-
-          <!-- Step 1: Details form -->
-          <div id="reg-step1">
-            <div class="form-field">
-              <label class="form-label">שם מלא</label>
-              <div class="input-wrap">
-                <input type="text" id="reg-name" placeholder="ישראל ישראלי" autocomplete="name"/>
-                <span class="input-icon">👤</span>
-              </div>
+          <div class="form-field">
+            <label class="form-label">שם מלא</label>
+            <div class="input-wrap">
+              <input type="text" id="reg-name" placeholder="ישראל ישראלי" autocomplete="name"/>
+              <span class="input-icon">👤</span>
             </div>
-            <div class="form-field">
-              <label class="form-label">אימייל</label>
-              <div class="input-wrap">
-                <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
-                <span class="input-icon">✉️</span>
-              </div>
-            </div>
-            <div class="form-field">
-              <label class="form-label">סיסמה</label>
-              <div class="input-wrap">
-                <input type="password" id="reg-pw" placeholder="מינימום 6 תווים" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>
-                <span class="input-icon" id="reg-pw-toggle" style="cursor:pointer;pointer-events:all;" onclick="togglePwVis('reg-pw','reg-pw-toggle')">👁</span>
-              </div>
-              <div class="pw-strength">
-                <div class="pw-seg" id="ps1"></div>
-                <div class="pw-seg" id="ps2"></div>
-                <div class="pw-seg" id="ps3"></div>
-                <div class="pw-seg" id="ps4"></div>
-              </div>
-              <div class="pw-lbl text-muted text-sm" id="pw-lbl"></div>
-            </div>
-            <div class="form-field">
-              <label class="form-label">אמת סיסמה</label>
-              <div class="input-wrap">
-                <input type="password" id="reg-pw2" placeholder="חזור על הסיסמה" autocomplete="new-password"/>
-                <span class="input-icon">🔒</span>
-              </div>
-            </div>
-            <button class="btn btn-primary btn-wide btn-glow mt-2" id="btn-register" onclick="doRegisterStep1()">
-              <span>צור חשבון 🚀</span>
-            </button>
-            <div class="divider"><span class="divider-text">או</span></div>
-            <button class="btn-google" onclick="doGoogleLogin()">
-              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              הרשמה עם Google
-            </button>
           </div>
-
-          <!-- Step 2: OTP Verification -->
-          <div id="reg-step2" style="display:none">
-            <div class="otp-box">
-              <div class="otp-title">📧 קוד אימות נשלח!</div>
-              <div class="otp-sub" id="otp-email-display">הכנס את הקוד בן 6 הספרות שנשלח אל <strong></strong></div>
-              <div class="otp-inputs">
-                <input class="otp-input" id="otp-0" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(0,this)" onkeydown="otpKey(0,event)"/>
-                <input class="otp-input" id="otp-1" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(1,this)" onkeydown="otpKey(1,event)"/>
-                <input class="otp-input" id="otp-2" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(2,this)" onkeydown="otpKey(2,event)"/>
-                <input class="otp-input" id="otp-3" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(3,this)" onkeydown="otpKey(3,event)"/>
-                <input class="otp-input" id="otp-4" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(4,this)" onkeydown="otpKey(4,event)"/>
-                <input class="otp-input" id="otp-5" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="otpInput(5,this)" onkeydown="otpKey(5,event)"/>
-              </div>
-              <div class="otp-resend">לא קיבלת? <span onclick="resendOtp()">שלח שוב</span> | <span onclick="backToStep1()">חזור</span></div>
+          <div class="form-field">
+            <label class="form-label">אימייל</label>
+            <div class="input-wrap">
+              <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+              <span class="input-icon">✉️</span>
             </div>
-            <button class="btn btn-primary btn-wide btn-glow" id="btn-verify-otp" onclick="doVerifyOtp()">
-              <span>אמת ✔</span>
-            </button>
           </div>
+          <div class="form-field">
+            <label class="form-label">סיסמה</label>
+            <div class="input-wrap">
+              <input type="password" id="reg-pw" placeholder="מינימום 6 תווים" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>
+              <span class="input-icon" id="reg-pw-toggle" style="cursor:pointer;pointer-events:all;" onclick="togglePwVis('reg-pw','reg-pw-toggle')">👁</span>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div>
+              <div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div>
+            </div>
+            <div class="pw-lbl text-muted text-sm" id="pw-lbl"></div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">אמת סיסמה</label>
+            <div class="input-wrap">
+              <input type="password" id="reg-pw2" placeholder="חזור על הסיסמה" autocomplete="new-password"/>
+              <span class="input-icon">🔒</span>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-wide btn-glow mt-2" id="btn-register" onclick="doRegister()">
+            <span>צור חשבון 🚀</span>
+          </button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: DASHBOARD
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: DASHBOARD ═══ -->
   <section class="page" id="page-dashboard">
     <div class="dash-layout">
-      <!-- LEFT SIDEBAR -->
       <aside>
-        <!-- Profile -->
         <div class="panel">
           <div class="panel-hd">
             <div class="panel-title"><div class="panel-title-dot"></div>פרופיל</div>
@@ -975,7 +816,6 @@ img { display:block; }
           </div>
         </div>
 
-        <!-- Share -->
         <div class="panel">
           <div class="panel-hd"><div class="panel-title"><div class="panel-title-dot"></div>הקישור שלך</div></div>
           <div class="share-box">
@@ -989,13 +829,11 @@ img { display:block; }
           </div>
         </div>
 
-        <!-- Theme -->
         <div class="panel">
           <div class="panel-hd"><div class="panel-title"><div class="panel-title-dot"></div>ערכת צבעים</div></div>
           <div class="theme-row" id="theme-row"></div>
         </div>
 
-        <!-- Settings -->
         <div class="panel">
           <div class="panel-hd"><div class="panel-title"><div class="panel-title-dot"></div>הגדרות</div></div>
           <div class="form-field">
@@ -1012,27 +850,21 @@ img { display:block; }
         </div>
       </aside>
 
-      <!-- MAIN CONTENT -->
       <main>
         <div class="tabs-bar">
           <button class="tab-btn active" id="t-links"     onclick="switchTab('links',this)">🔗 לינקים</button>
           <button class="tab-btn"        id="t-analytics" onclick="switchTab('analytics',this)">📊 אנליטיקס</button>
         </div>
 
-        <!-- LINKS TAB -->
         <div id="tab-links">
           <div class="panel">
             <div class="panel-hd">
               <div class="panel-title"><div class="panel-title-dot"></div>הלינקים שלי</div>
               <button class="btn btn-primary btn-sm btn-glow" onclick="openModal()">+ הוסף לינק</button>
             </div>
-
-            <!-- Search -->
             <div style="position:relative;margin-bottom:0.85rem;">
               <input type="search" id="link-search" placeholder="🔍  חפש לינק..." oninput="onLinkSearch(this.value)" style="padding-right:1rem;background:var(--surface2);border-color:var(--border);"/>
             </div>
-
-            <!-- Sort + Tools row -->
             <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.85rem;flex-wrap:wrap;">
               <span style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-left:0.25rem;">מיון:</span>
               <button class="sort-btn active" data-sort="manual"  onclick="setSortMode('manual')">ידני</button>
@@ -1043,8 +875,6 @@ img { display:block; }
               <button class="btn btn-ghost btn-xs" onclick="exportLinks()" title="יצא JSON">📤</button>
               <button class="btn btn-ghost btn-xs" onclick="importLinks()" title="ייבא JSON">📥</button>
             </div>
-
-            <!-- Bulk bar -->
             <div class="bulk-bar" id="bulk-bar">
               <span class="bulk-count">0 נבחרו</span>
               <button class="btn btn-success btn-xs" onclick="bulkToggle(true)">✅ הפעל</button>
@@ -1052,18 +882,14 @@ img { display:block; }
               <button class="btn btn-danger btn-xs"  onclick="bulkDelete()">🗑 מחק</button>
               <button class="btn btn-ghost btn-xs"   onclick="clearSelection()">✕</button>
             </div>
-
             <div class="links-stack" id="links-stack"></div>
           </div>
-
-          <!-- Mini analytics -->
           <div class="panel mt-1" id="mini-analytics-panel">
             <div class="panel-hd"><div class="panel-title"><div class="panel-title-dot"></div>קליקים לפי לינק</div></div>
             <div id="mini-analytics"></div>
           </div>
         </div>
 
-        <!-- ANALYTICS TAB -->
         <div id="tab-analytics" style="display:none">
           <div class="analytics-kpi-grid" id="kpi-grid"></div>
           <div class="chart-card">
@@ -1076,23 +902,15 @@ img { display:block; }
             <div id="clicks-bars"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
-            <div class="chart-card">
-              <div class="chart-title">🌐 מקורות תנועה</div>
-              <div id="source-bars"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">📱 סוג מכשיר</div>
-              <div id="device-bars"></div>
-            </div>
+            <div class="chart-card"><div class="chart-title">🌐 מקורות תנועה</div><div id="source-bars"></div></div>
+            <div class="chart-card"><div class="chart-title">📱 סוג מכשיר</div><div id="device-bars"></div></div>
           </div>
         </div>
       </main>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: ANALYTICS (nav tab)
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: ANALYTICS ═══ -->
   <section class="page" id="page-analytics">
     <div class="analytics-wrap">
       <div class="analytics-kpi-grid" id="kpi-grid-full"></div>
@@ -1112,9 +930,7 @@ img { display:block; }
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: PUBLIC VIEW
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: PUBLIC VIEW ═══ -->
   <section class="page" id="page-public">
     <div class="pub-wrap">
       <div class="pub-back-bar" id="pub-back-bar"></div>
@@ -1123,7 +939,7 @@ img { display:block; }
           <div class="pub-avatar-ring"></div>
           <div class="pub-avatar-ring-inner"></div>
           <div id="pub-av-container">
-            <div class="pub-avatar-ph" id="pub-av">M</div>
+            <div class="pub-avatar-ph">M</div>
           </div>
         </div>
         <div class="pub-name" id="pub-name">MonoLink</div>
@@ -1135,28 +951,21 @@ img { display:block; }
       </div>
     </div>
   </section>
-</div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: TERMS OF SERVICE
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: TERMS ═══ -->
   <section class="page" id="page-terms">
     <div class="legal-wrap">
-      <div class="legal-back">
-        <button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button>
-      </div>
+      <div class="legal-back"><button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button></div>
       <div class="legal-header">
         <div class="legal-icon">📋</div>
         <div class="legal-title">תנאי שימוש</div>
         <div class="legal-updated">עודכן לאחרונה: מרץ 2025</div>
       </div>
-
       <div class="legal-section">
         <div class="legal-section-title">קבלת התנאים</div>
-        <p class="legal-p">ברוך הבא ל-MonoLink. על ידי גישה לשירות או שימוש בו, אתה מסכים להיות מחויב לתנאי שימוש אלה. אם אינך מסכים לתנאים אלה, אנא אל תשתמש בשירות.</p>
-        <p class="legal-p">MonoLink שומרת לעצמה את הזכות לשנות תנאים אלה בכל עת. שינויים יכנסו לתוקף עם פרסומם. המשך השימוש בשירות לאחר פרסום שינויים מהווה קבלה של התנאים החדשים.</p>
+        <p class="legal-p">ברוך הבא ל-MonoLink. על ידי גישה לשירות או שימוש בו, אתה מסכים להיות מחויב לתנאי שימוש אלה.</p>
+        <p class="legal-p">MonoLink שומרת לעצמה את הזכות לשנות תנאים אלה בכל עת. שינויים יכנסו לתוקף עם פרסומם.</p>
       </div>
-
       <div class="legal-section">
         <div class="legal-section-title">תיאור השירות</div>
         <p class="legal-p">MonoLink היא פלטפורמה לניהול זהות דיגיטלית המאפשרת למשתמשים ליצור דף פרופיל אחד המרכז את כל הקישורים שלהם. השירות כולל:</p>
@@ -1168,50 +977,15 @@ img { display:block; }
           <li>שיתוף קל דרך QR קוד ולינק ישיר</li>
         </ul>
       </div>
-
       <div class="legal-section">
         <div class="legal-section-title">חשבון משתמש</div>
         <p class="legal-p">כדי להשתמש בתכונות מסוימות של השירות, עליך ליצור חשבון. אתה אחראי לשמור על סודיות פרטי הכניסה שלך.</p>
-        <div class="legal-highlight">
-          <p>⚠️ אתה מתחייב לספק מידע מדויק ועדכני בעת ההרשמה ולעדכן אותו כפי הצורך. אתה אחראי לכל הפעילות המתבצעת תחת חשבונך.</p>
-        </div>
-        <ul class="legal-list">
-          <li>אסור להעביר את חשבונך לאדם אחר</li>
-          <li>עליך להודיע לנו מיד על כל שימוש לא מורשה בחשבונך</li>
-          <li>אנו שומרים את הזכות להשעות חשבונות המפרים תנאים אלה</li>
-        </ul>
+        <div class="legal-highlight"><p>⚠️ אתה מתחייב לספק מידע מדויק ועדכני בעת ההרשמה ולעדכן אותו כפי הצורך.</p></div>
       </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">תוכן המשתמש</div>
-        <p class="legal-p">אתה שומר על הבעלות על התוכן שאתה מפרסם בשירות. על ידי פרסום תוכן, אתה מעניק ל-MonoLink רישיון לא-בלעדי לשימוש בתוכן לצורך מתן השירות.</p>
-        <p class="legal-p">אסור לפרסם תוכן שהוא:</p>
-        <ul class="legal-list">
-          <li>לא חוקי, פוגעני, מטעה או מזיק</li>
-          <li>מפר זכויות יוצרים, סימן מסחרי או זכויות קניין רוחני אחרות</li>
-          <li>ספאם, פישינג, מאלוור, או כל תוכן זדוני אחר</li>
-          <li>תוכן שמטרתו לפגוע, להטריד, או לאיים על אנשים אחרים</li>
-        </ul>
-      </div>
-
       <div class="legal-section">
         <div class="legal-section-title">הגבלת אחריות</div>
         <p class="legal-p">השירות מסופק "כפי שהוא" ללא אחריות מכל סוג שהוא. MonoLink אינה אחראית לנזקים ישירים, עקיפים, מקריים, מיוחדים או תוצאתיים הנובעים מהשימוש בשירות.</p>
-        <div class="legal-highlight">
-          <p>MonoLink אינה מבטיחה שהשירות יהיה זמין ללא הפרעה, ללא שגיאות, או שהשגיאות יתוקנו.</p>
-        </div>
       </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">סיום החשבון</div>
-        <p class="legal-p">אתה יכול לסיים את חשבונך בכל עת על ידי פנייה אלינו. אנו שומרים את הזכות לסיים או להשעות את גישתך לשירות בגין הפרת תנאים אלה.</p>
-      </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">דין חל</div>
-        <p class="legal-p">תנאים אלה כפופים לחוקי מדינת ישראל. כל מחלוקת תידון בבתי המשפט המוסמכים בישראל.</p>
-      </div>
-
       <div class="legal-footer">
         <p>שאלות על תנאי השימוש? <span class="legal-contact" onclick="toast('📧 support@monolink.app','success')">צור קשר</span></p>
         <p style="margin-top:0.5rem;">© 2025 MonoLink — כל הזכויות שמורות</p>
@@ -1219,91 +993,43 @@ img { display:block; }
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       PAGE: PRIVACY POLICY
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══ PAGE: PRIVACY ═══ -->
   <section class="page" id="page-privacy">
     <div class="legal-wrap">
-      <div class="legal-back">
-        <button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button>
-      </div>
+      <div class="legal-back"><button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button></div>
       <div class="legal-header">
         <div class="legal-icon">🔒</div>
         <div class="legal-title">מדיניות פרטיות</div>
         <div class="legal-updated">עודכן לאחרונה: מרץ 2025</div>
       </div>
-
       <div class="legal-section">
         <div class="legal-section-title">מידע שאנו אוספים</div>
-        <p class="legal-p">אנו אוספים מידע כדי לספק שירות טוב יותר לכל המשתמשים שלנו. המידע שאנו אוספים כולל:</p>
+        <p class="legal-p">אנו אוספים מידע כדי לספק שירות טוב יותר לכל המשתמשים שלנו. הנתונים נשמרים מקומית על המכשיר שלך.</p>
         <ul class="legal-list">
-          <li><strong style="color:var(--text)">מידע שאתה מספק:</strong> שם, כתובת אימייל, סיסמה (מוצפנת), ביו, וקישורים שאתה מוסיף</li>
-          <li><strong style="color:var(--text)">מידע שנאסף אוטומטית:</strong> נתוני שימוש, כתובת IP, סוג דפדפן, ומכשיר</li>
-          <li><strong style="color:var(--text)">מידע מגורמים שלישיים:</strong> אם אתה נכנס עם Google, אנו מקבלים מידע פרופיל בסיסי</li>
-          <li><strong style="color:var(--text)">נתוני אנליטיקס:</strong> צפיות, קליקים על קישורים, ומקורות תנועה</li>
+          <li>שם, כתובת אימייל, ביו, וקישורים שאתה מוסיף</li>
+          <li>נתוני אנליטיקס: צפיות וקליקים על קישורים</li>
+          <li>הגדרות עיצוב ועדפות תצוגה</li>
         </ul>
       </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">כיצד אנו משתמשים במידע</div>
-        <p class="legal-p">אנו משתמשים במידע שנאסף למטרות הבאות:</p>
-        <ul class="legal-list">
-          <li>לספק, לתחזק ולשפר את השירות שלנו</li>
-          <li>ליצור ולנהל את חשבון המשתמש שלך</li>
-          <li>לאמת את זהותך ולאבטח את חשבונך</li>
-          <li>להציג לך נתוני אנליטיקס על דף הפרופיל שלך</li>
-          <li>לשלוח הודעות שירות חשובות (אימות, איפוס סיסמה)</li>
-          <li>לניתוח שימוש ולשיפור חוויית המשתמש</li>
-        </ul>
-      </div>
-
       <div class="legal-section">
         <div class="legal-section-title">שמירת מידע ואבטחה</div>
-        <div class="legal-highlight">
-          <p>🛡️ אנו משתמשים ב-Firebase של Google לאחסון נתונים מאובטח. הסיסמאות מוצפנות ולעולם אינן נשמרות בטקסט גלוי. הנתונים מאוחסנים בשרתים מוגנים בהצפנה SSL.</p>
-        </div>
-        <p class="legal-p">אנו שומרים את המידע שלך כל עוד חשבונך פעיל. אתה יכול לבקש מחיקת המידע שלך בכל עת על ידי פנייה אלינו.</p>
+        <div class="legal-highlight"><p>🛡️ הנתונים שלך נשמרים מקומית על המכשיר שלך בלבד. לא מועבר מידע לשרתים חיצוניים.</p></div>
       </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">שיתוף מידע</div>
-        <p class="legal-p">אנו לא מוכרים, סוחרים, או מעבירים את המידע האישי שלך לצדדים שלישיים, למעט במקרים הבאים:</p>
-        <ul class="legal-list">
-          <li><strong style="color:var(--text)">ספקי שירות:</strong> Firebase (Google) לאחסון, EmailJS לשליחת אימיילים</li>
-          <li><strong style="color:var(--text)">דרישות חוקיות:</strong> אם נדרש על פי חוק או צו שיפוטי</li>
-          <li><strong style="color:var(--text)">הגנה על זכויות:</strong> להגן על הזכויות, הרכוש, או הביטחון של MonoLink</li>
-        </ul>
-      </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">עוגיות (Cookies)</div>
-        <p class="legal-p">אנו משתמשים בעוגיות ובטכנולוגיות דומות לניהול הפגישה (Session) שלך ולשמירת ההעדפות שלך. אינך יכול לבטל עוגיות חיוניות מכיוון שהן נדרשות לתפקוד השירות.</p>
-      </div>
-
       <div class="legal-section">
         <div class="legal-section-title">הזכויות שלך</div>
-        <p class="legal-p">יש לך את הזכויות הבאות ביחס למידע האישי שלך:</p>
         <ul class="legal-list">
-          <li><strong style="color:var(--text)">גישה:</strong> לבקש עותק של המידע שלנו עליך</li>
-          <li><strong style="color:var(--text)">תיקון:</strong> לבקש תיקון מידע לא מדויק</li>
-          <li><strong style="color:var(--text)">מחיקה:</strong> לבקש מחיקת המידע שלך ("הזכות להישכח")</li>
-          <li><strong style="color:var(--text)">ניידות:</strong> לקבל את הנתונים שלך בפורמט מובנה</li>
-          <li><strong style="color:var(--text)">התנגדות:</strong> להתנגד לעיבוד מסוים של המידע שלך</li>
+          <li>גישה: לצפות בכל המידע שנשמר</li>
+          <li>מחיקה: להתנתק מוחק את כל הנתונים</li>
+          <li>ניידות: יצוא הלינקים כקובץ JSON</li>
         </ul>
-        <p class="legal-p">לממש זכויות אלה, פנה אלינו דרך אימייל.</p>
       </div>
-
-      <div class="legal-section">
-        <div class="legal-section-title">שינויים במדיניות</div>
-        <p class="legal-p">אנו עשויים לעדכן מדיניות פרטיות זו מעת לעת. נודיע לך על שינויים משמעותיים על ידי פרסום הודעה בולטת בשירות שלנו.</p>
-      </div>
-
       <div class="legal-footer">
         <p>שאלות על פרטיות? <span class="legal-contact" onclick="toast('📧 privacy@monolink.app','success')">privacy@monolink.app</span></p>
         <p style="margin-top:0.5rem;">© 2025 MonoLink — כל הזכויות שמורות</p>
       </div>
     </div>
   </section>
+</div>
 
 <!-- ─── Link Modal ─── -->
 <div class="overlay" id="link-overlay">
@@ -1318,7 +1044,7 @@ img { display:block; }
     </div>
     <div class="form-field">
       <label class="form-label">URL</label>
-      <input type="url" id="m-url" placeholder="https://example.com"/>
+      <input type="url" id="m-url" placeholder="https://example.com" onkeydown="if(event.key==='Enter') saveLink()"/>
     </div>
     <div class="form-field">
       <label class="form-label">תיאור קצר (אופציונלי)</label>
@@ -1338,77 +1064,21 @@ img { display:block; }
 <!-- ─── Toast Tray ─── -->
 <div id="toast-tray"></div>
 
-<!-- ─── Login Transition Overlay ─── -->
+<!-- ─── Login Transition ─── -->
 <div id="login-transition">
   <div class="lt-particles" id="lt-particles"></div>
   <div class="lt-ring"></div>
   <div class="lt-logo">MONOLINK</div>
-  <div class="lt-msg" id="lt-msg">מאמת פרטים...</div>
+  <div class="lt-msg" id="lt-msg">טוען...</div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════════════════ -->
-<script type="module">
-import { initializeApp }         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signInWithPopup, GoogleAuthProvider, signOut,
-  sendPasswordResetEmail, updateProfile, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore, doc, getDoc, setDoc, updateDoc,
-  onSnapshot, serverTimestamp, increment
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+/* ══════════════════════════════════════════════════════════════
+   MONOLINK — LOCAL STORAGE ENGINE
+   ✅ ללא Firebase | ✅ לינקים עובדים | ✅ הכל שמור מקומית
+══════════════════════════════════════════════════════════════ */
 
-/* ──────────────────────────────────────────────────────────────
-   EMAILJS CONFIG
-   ⚠️  החלף את הערכים האלה בפרטים שלך מ-emailjs.com
-────────────────────────────────────────────────────────────── */
-const EMAILJS_PUBLIC_KEY  = "DH_DaGCtMdYdTNWbu";   // ← החלף
-const EMAILJS_SERVICE_ID  = "service_dix0od9";   // ← החלף
-const EMAILJS_TEMPLATE_ID = "template_fkoddyg";  // ← החלף
-// שם המשתנים ב-template:
-// {{to_email}} {{to_name}} {{otp_code}} {{app_name}}
-
-/* ──────────────────────────────────────────────────────────────
-   FIREBASE CONFIG
-────────────────────────────────────────────────────────────── */
-const fbConfig = {
-  apiKey:            "AIzaSyAhDh8ZiK_Z-TqRVfXn6c-n8E7-yvGz180",
-  authDomain:        "qick-stop.firebaseapp.com",
-  databaseURL:       "https://qick-stop-default-rtdb.firebaseio.com",
-  projectId:         "qick-stop",
-  storageBucket:     "qick-stop.firebasestorage.app",
-  messagingSenderId: "332568370154",
-  appId:             "1:332568370154:web:dddcad517a4cc23bab7093",
-  measurementId:     "G-4T8J9NFBTQ"
-};
-const fbApp = initializeApp(fbConfig);
-const auth  = getAuth(fbApp);
-const db    = getFirestore(fbApp);
-
-/* ──────────────────────────────────────────────────────────────
-   APP STATE
-────────────────────────────────────────────────────────────── */
-let user        = null;
-let links       = [];
-let userData    = {};
-let editId      = null;
-let selEmoji    = "🔗";
-let unsub       = null;
-let activeTheme = 0;
-let currentPage = "auth";
-let sortMode    = "manual";
-let searchQuery = "";
-let draggedId   = null;
-let selectedIds = new Set();
-
-// OTP state
-let pendingRegData = null;  // {name, email, pw}
-let otpCode        = "";
-let otpExpiry      = 0;
-
+/* ── CONFIG ── */
 const EMOJIS = [
   "🔗","🌐","📱","💼","🎨","🎵","📸","🎬","📝","🛒",
   "💬","📧","🐦","📘","▶️","💡","🚀","🌟","🎯","⚡",
@@ -1423,351 +1093,69 @@ const THEMES = [
   { name:"ice",     c1:"#b2ebf2", c2:"#80deea", c3:"#4dd0e1" },
 ];
 
-/* ──────────────────────────────────────────────────────────────
-   EMAILJS INIT
-────────────────────────────────────────────────────────────── */
-function initEmailJS() {
-  if (window.emailjs) {
-    window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-  }
+/* ── STATE ── */
+let currentUser  = null;  // { name, email, pw, createdAt }
+let links        = [];
+let userData     = {};
+let editId       = null;
+let selEmoji     = "🔗";
+let activeTheme  = 0;
+let currentPage  = "auth";
+let prevPage     = "auth";
+let sortMode     = "manual";
+let searchQuery  = "";
+let draggedId    = null;
+let selectedIds  = new Set();
+
+/* ── LOCAL STORAGE KEYS ── */
+const KEY_USERS    = "ml_users";
+const KEY_SESSION  = "ml_session";
+const KEY_DATA     = uid => "ml_data_" + uid;
+
+/* ── STORAGE HELPERS ── */
+function getUsers()    { try { return JSON.parse(localStorage.getItem(KEY_USERS)  || "{}"); } catch(e) { return {}; } }
+function saveUsers(u)  { localStorage.setItem(KEY_USERS, JSON.stringify(u)); }
+function getSession()  { try { return JSON.parse(localStorage.getItem(KEY_SESSION) || "null"); } catch(e) { return null; } }
+function saveSession(s){ localStorage.setItem(KEY_SESSION, JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem(KEY_SESSION); }
+
+function getUserData(uid) {
+  try { return JSON.parse(localStorage.getItem(KEY_DATA(uid)) || "null"); }
+  catch(e) { return null; }
 }
-initEmailJS();
-
-/* ──────────────────────────────────────────────────────────────
-   OTP HELPERS
-────────────────────────────────────────────────────────────── */
-function generateOTP() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-async function sendOTPEmail(email, name, code) {
-  if (!window.emailjs) throw new Error("EmailJS לא נטען");
-  const result = await window.emailjs.send(
-    EMAILJS_SERVICE_ID,
-    EMAILJS_TEMPLATE_ID,
-    {
-      to_email:  email,
-      to_name:   name || "משתמש",
-      otp_code:  code,
-      app_name:  "MonoLink"
-    }
-  );
-  return result;
-}
-
-window.otpInput = function(idx, el) {
-  const v = el.value.replace(/\D/g, "");
-  el.value = v ? v[0] : "";
-  el.classList.toggle("filled", !!el.value);
-  if (el.value && idx < 5) {
-    document.getElementById("otp-" + (idx + 1)).focus();
-  }
-};
-
-window.otpKey = function(idx, e) {
-  if (e.key === "Backspace" && !document.getElementById("otp-" + idx).value && idx > 0) {
-    document.getElementById("otp-" + (idx - 1)).focus();
-  }
-  if (e.key === "Enter") doVerifyOtp();
-};
-
-function getOTPValue() {
-  return [0,1,2,3,4,5].map(i => document.getElementById("otp-" + i).value).join("");
+function saveUserData(uid, data) {
+  localStorage.setItem(KEY_DATA(uid), JSON.stringify(data));
 }
 
-function clearOTPInputs() {
-  for (let i = 0; i < 6; i++) {
-    const el = document.getElementById("otp-" + i);
-    el.value = "";
-    el.classList.remove("filled");
-  }
+function createDefaultData(uid, name, email) {
+  return {
+    uid, displayName: name, email, photoURL: "", bio: "",
+    links: [], totalClicks: 0, totalViews: 0,
+    weeklyClicks: [0,0,0,0,0,0,0], theme: 0,
+    createdAt: Date.now()
+  };
 }
 
-window.resendOtp = async function() {
-  if (!pendingRegData) return;
-  const errEl = document.getElementById("reg-error");
-  const sucEl = document.getElementById("reg-success");
-  errEl.classList.remove("show");
-  sucEl.classList.remove("show");
-  try {
-    otpCode   = generateOTP();
-    otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
-    await sendOTPEmail(pendingRegData.email, pendingRegData.name, otpCode);
-    clearOTPInputs();
-    document.getElementById("otp-0").focus();
-    showSuccessMsg(sucEl, "✉️ קוד חדש נשלח!");
-  } catch(e) {
-    showErr(errEl, "❌ שגיאה בשליחת הקוד: " + e.message);
-  }
-};
-
-window.backToStep1 = function() {
-  document.getElementById("reg-step1").style.display = "block";
-  document.getElementById("reg-step2").style.display = "none";
-  document.getElementById("reg-error").classList.remove("show");
-  document.getElementById("reg-success").classList.remove("show");
-  pendingRegData = null;
-};
-
-/* ──────────────────────────────────────────────────────────────
-   LOGIN TRANSITION ANIMATION
-────────────────────────────────────────────────────────────── */
-function showLoginTransition(msg) {
-  const overlay = document.getElementById("login-transition");
-  const msgEl   = document.getElementById("lt-msg");
-  const ptcls   = document.getElementById("lt-particles");
-  if (!overlay) return;
-
-  // Generate floating particles
-  ptcls.innerHTML = "";
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement("div");
-    p.className = "lt-particle";
-    p.style.cssText = `
-      left:${Math.random()*100}%;top:${Math.random()*100}%;
-      --dur:${2+Math.random()*3}s;--delay:${Math.random()*2}s;
-      --tx:${(Math.random()-0.5)*80}px;--ty:${-(20+Math.random()*80)}px;
-      background:${["var(--cyan)","var(--violet)","var(--pink)"][i%3]};
-      opacity:${0.3+Math.random()*0.5};
-      width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;
-    `;
-    ptcls.appendChild(p);
-  }
-
-  if (msgEl) msgEl.textContent = msg || "מאמת פרטים...";
-  overlay.classList.remove("exit");
-  overlay.classList.add("active");
-
-  // Auto-hide after 1.4s
-  setTimeout(() => {
-    overlay.classList.add("exit");
-    setTimeout(() => overlay.classList.remove("active","exit"), 650);
-  }, 1400);
+/* ── UTILS ── */
+function uid() { return Math.random().toString(36).slice(2, 11) + Date.now().toString(36); }
+function esc(s) {
+  return String(s || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function slugOf(name) {
+  const s = String(name).toLowerCase().trim().replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");
+  return s || "user";
+}
+function setEl(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function hexToRgb(hex) {
+  const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : "0,200,255";
 }
 
-/* ──────────────────────────────────────────────────────────────
-   AUTH STATE LISTENER
-────────────────────────────────────────────────────────────── */
-onAuthStateChanged(auth, async u => {
-  if (u) {
-    user = u;
-    // Show transition overlay immediately (non-blocking)
-    showLoginTransition("ברוך הבא, " + (u.displayName || "משתמש") + "! 🚀");
-    // Navigate to dashboard right away — don't wait for Firestore
-    renderNavAuth();
-    navGo("dashboard", document.getElementById("ntab-dashboard"));
-    // Then load data in background
-    try {
-      await ensureDoc(u);
-      listenDoc(u.uid);
-    } catch(e) {
-      console.error("Firestore init error:", e);
-      toast("⚠️ בעיה בטעינת הנתונים: " + e.message, "warn");
-    }
-    setTimeout(() => toast("👋 שלום, " + (u.displayName || "משתמש") + "!", "success"), 1600);
-  } else {
-    user = null;
-    if (unsub) { unsub(); unsub = null; }
-    links    = [];
-    userData = {};
-    renderNavGuest();
-    navGo("auth", null);
-  }
-});
-
-/* ──────────────────────────────────────────────────────────────
-   FIRESTORE — ensure user document exists
-────────────────────────────────────────────────────────────── */
-async function ensureDoc(u) {
-  const ref  = doc(db, "users", u.uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      uid:          u.uid,
-      displayName:  u.displayName || "משתמש",
-      email:        u.email       || "",
-      photoURL:     u.photoURL    || "",
-      bio:          "",
-      links:        [],
-      totalClicks:  0,
-      totalViews:   0,
-      weeklyClicks: [0,0,0,0,0,0,0],
-      theme:        0,
-      createdAt:    serverTimestamp()
-    });
-  }
-}
-
-/* ──────────────────────────────────────────────────────────────
-   FIRESTORE — realtime listener
-────────────────────────────────────────────────────────────── */
-function listenDoc(uid_param) {
-  if (unsub) unsub();
-  const ref = doc(db, "users", uid_param);
-  let firstLoad = true;
-  unsub = onSnapshot(ref, snap => {
-    if (!snap.exists()) return;
-    userData    = snap.data();
-    links       = userData.links || [];
-    activeTheme = userData.theme || 0;
-
-    applyTheme(activeTheme);
-    renderProfile();
-    renderLinksListUpgraded();
-    renderPublicView();
-    renderThemeRow();
-    renderAnalytics();
-    updateBulkBar();
-    maybeShowOnboarding();
-
-    // Fill settings fields
-    const nameField = document.getElementById("settings-name");
-    const bioField  = document.getElementById("settings-bio");
-    if (nameField) nameField.value = userData.displayName || "";
-    if (bioField)  { bioField.value = userData.bio || ""; updateBioCounter(); }
-
-    // Share URL
-    const slug = slugOf(userData.displayName || user?.uid || "user");
-    const shareEl = document.getElementById("share-url");
-    if (shareEl) shareEl.textContent = "monolink.app/u/" + slug;
-
-    // Joined date
-    const joined   = userData.createdAt?.toDate ? userData.createdAt.toDate() : null;
-    const joinedEl = document.getElementById("dash-joined");
-    if (joinedEl && joined) joinedEl.textContent = "חבר מ: " + joined.toLocaleDateString("he-IL");
-
-    // Stats
-    if (firstLoad) {
-      firstLoad = false;
-      animateCountUp("s-links",  links.length,             600);
-      animateCountUp("s-clicks", userData.totalClicks || 0, 800);
-      animateCountUp("s-views",  userData.totalViews  || 0, 1000);
-    } else {
-      setEl("s-links",  links.length);
-      setEl("s-clicks", userData.totalClicks || 0);
-      setEl("s-views",  userData.totalViews  || 0);
-    }
-  }, err => {
-    console.error("Firestore snapshot error:", err);
-    toast("❌ שגיאת חיבור לשרת", "error");
-  });
-}
-
-/* ──────────────────────────────────────────────────────────────
-   NAVIGATION
-────────────────────────────────────────────────────────────── */
-let prevPage = "auth";
-function navGo(name, btn) {
-  prevPage = currentPage;
-  currentPage = name;
-
-  // Update nav tab highlights
-  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-
-  // Toggle pages (including legal pages)
-  ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
-    const el = document.getElementById("page-" + p);
-    if (el) el.classList.toggle("active", p === name);
-  });
-
-  if (name === "public" && user) recordView();
-  if (name === "analytics") renderFullAnalyticsPage();
-}
-window.navGo = navGo;
-
-function navBack() {
-  navGo(prevPage || (user ? "dashboard" : "auth"), null);
-}
-window.navBack = navBack;
-
-function handleBrandClick() {
-  if (user) navGo("dashboard", document.getElementById("ntab-dashboard"));
-}
-window.handleBrandClick = handleBrandClick;
-
-/* ──────────────────────────────────────────────────────────────
-   NAV RENDERING
-────────────────────────────────────────────────────────────── */
-function renderNavAuth() {
-  document.getElementById("nav-center").style.display = "flex";
-  const r  = document.getElementById("nav-right");
-  const ph = user.photoURL
-    ? `<img class="nav-avatar" src="${esc(user.photoURL)}" alt="avatar"/>`
-    : `<div class="nav-avatar-placeholder">${(user.displayName || "?")[0].toUpperCase()}</div>`;
-  r.innerHTML = ph;
-}
-function renderNavGuest() {
-  document.getElementById("nav-center").style.display = "none";
-  document.getElementById("nav-right").innerHTML = `
-    <button class="btn btn-outline btn-sm" onclick="switchAuthTab('login')">כניסה</button>
-    <button class="btn btn-primary btn-sm btn-glow" onclick="switchAuthTab('register')">הרשמה</button>
-  `;
-}
-
-/* ──────────────────────────────────────────────────────────────
-   AUTH — SWITCH TABS
-────────────────────────────────────────────────────────────── */
-function switchAuthTab(tab) {
-  document.getElementById("form-login").style.display    = tab === "login"    ? "block" : "none";
-  document.getElementById("form-register").style.display = tab === "register" ? "block" : "none";
-  document.getElementById("atab-login").classList.toggle("active",    tab === "login");
-  document.getElementById("atab-register").classList.toggle("active", tab === "register");
-  document.getElementById("login-error").classList.remove("show");
-  document.getElementById("reg-error").classList.remove("show");
-  document.getElementById("reg-success").classList.remove("show");
-  // Always go to auth page if not logged in
-  if (!user) {
-    ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
-      const el = document.getElementById("page-" + p);
-      if (el) el.classList.toggle("active", p === "auth");
-    });
-    currentPage = "auth";
-  }
-}
-window.switchAuthTab = switchAuthTab;
-
-/* ──────────────────────────────────────────────────────────────
-   AUTH — LOADING STATE
-────────────────────────────────────────────────────────────── */
-function setLoading(btnId, on, origLabel) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.classList.toggle("btn-loading", on);
-  if (on) {
-    if (origLabel) btn.dataset.orig = origLabel;
-    btn.innerHTML = `<div class="spinner"></div><span>רגע...</span>`;
-  } else {
-    btn.innerHTML = btn.dataset.orig || btn.innerHTML;
-  }
-}
-
-/* ──────────────────────────────────────────────────────────────
-   AUTH — EMAIL LOGIN
-────────────────────────────────────────────────────────────── */
-async function doEmailLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const pw    = document.getElementById("login-pw").value;
-  const errEl = document.getElementById("login-error");
-  errEl.classList.remove("show");
-  if (!email || !pw) { showErr(errEl, "נא למלא אימייל וסיסמה"); return; }
-  setLoading("btn-login", true, "<span>כניסה</span>");
-  try {
-    await signInWithEmailAndPassword(auth, email, pw);
-    // onAuthStateChanged will handle UI
-  } catch(e) {
-    showErr(errEl, authErrMsg(e.code));
-    setLoading("btn-login", false);
-  }
-}
-window.doEmailLogin = doEmailLogin;
-
-/* ──────────────────────────────────────────────────────────────
-   AUTH — REGISTER: ישיר ללא OTP (Firebase מאובטח)
-────────────────────────────────────────────────────────────── */
-async function doRegisterStep1() {
+/* ── AUTH: REGISTER ── */
+function doRegister() {
   const name  = document.getElementById("reg-name").value.trim();
-  const email = document.getElementById("reg-email").value.trim();
+  const email = document.getElementById("reg-email").value.trim().toLowerCase();
   const pw    = document.getElementById("reg-pw").value;
   const pw2   = document.getElementById("reg-pw2").value;
   const errEl = document.getElementById("reg-error");
@@ -1775,175 +1163,228 @@ async function doRegisterStep1() {
   errEl.classList.remove("show");
   sucEl.classList.remove("show");
 
-  if (!name)  { showErr(errEl, "נא למלא שם מלא"); return; }
-  if (!email) { showErr(errEl, "נא למלא אימייל"); return; }
-  if (!pw)    { showErr(errEl, "נא למלא סיסמה"); return; }
+  if (!name)         { showErr(errEl, "נא למלא שם מלא"); return; }
+  if (!email)        { showErr(errEl, "נא למלא אימייל"); return; }
+  if (!email.includes("@")) { showErr(errEl, "כתובת אימייל לא תקינה"); return; }
+  if (!pw)           { showErr(errEl, "נא למלא סיסמה"); return; }
   if (pw.length < 6) { showErr(errEl, "הסיסמה חייבת להכיל לפחות 6 תווים"); return; }
   if (pw !== pw2)    { showErr(errEl, "הסיסמאות לא תואמות"); return; }
 
-  setLoading("btn-register", true, "<span>יוצר חשבון...</span>");
+  const users = getUsers();
+  if (users[email])  { showErr(errEl, "אימייל כבר רשום במערכת"); return; }
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    await updateProfile(cred.user, { displayName: name });
-    await ensureDoc({ ...cred.user, displayName: name });
-    toast("🎉 ברוך הבא ל-MonoLink!", "success");
-    // onAuthStateChanged handles navigation automatically
-  } catch(e) {
-    showErr(errEl, authErrMsg(e.code));
-    setLoading("btn-register", false);
-  }
+  const newUid = "u_" + uid();
+  users[email] = { uid: newUid, name, email, pw, createdAt: Date.now() };
+  saveUsers(users);
+
+  const data = createDefaultData(newUid, name, email);
+  saveUserData(newUid, data);
+
+  saveSession({ uid: newUid, email, name });
+  toast("🎉 ברוך הבא ל-MonoLink!", "success");
+  loginSuccess(newUid, name, email);
 }
-window.doRegisterStep1 = doRegisterStep1;
 
-/* ──────────────────────────────────────────────────────────────
-   AUTH — REGISTER STEP 2: verify OTP & create account
-────────────────────────────────────────────────────────────── */
-async function doVerifyOtp() {
-  const errEl  = document.getElementById("reg-error");
-  const sucEl  = document.getElementById("reg-success");
+/* ── AUTH: LOGIN ── */
+function doEmailLogin() {
+  const email = document.getElementById("login-email").value.trim().toLowerCase();
+  const pw    = document.getElementById("login-pw").value;
+  const errEl = document.getElementById("login-error");
   errEl.classList.remove("show");
-  sucEl.classList.remove("show");
 
-  if (!pendingRegData) { showErr(errEl, "בעיה בתהליך ההרשמה, נסה שוב"); return; }
+  if (!email || !pw) { showErr(errEl, "נא למלא אימייל וסיסמה"); return; }
 
-  const entered = getOTPValue();
-  if (entered.length < 6) { showErr(errEl, "נא להזין את כל 6 הספרות של הקוד"); return; }
-  if (Date.now() > otpExpiry) { showErr(errEl, "⏰ הקוד פג תוקף. לחץ 'שלח שוב' לקוד חדש"); return; }
-  if (entered !== otpCode)   { showErr(errEl, "❌ הקוד שגוי. נסה שוב"); return; }
+  const users = getUsers();
+  const found = users[email];
+  if (!found)       { showErr(errEl, "לא נמצא משתמש עם אימייל זה"); return; }
+  if (found.pw !== pw) { showErr(errEl, "סיסמה שגויה"); return; }
 
-  setLoading("btn-verify-otp", true, "<span>אמת ✔</span>");
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, pendingRegData.email, pendingRegData.pw);
-    await updateProfile(cred.user, { displayName: pendingRegData.name });
-    await ensureDoc({ ...cred.user, displayName: pendingRegData.name });
-    pendingRegData = null;
-    otpCode = "";
-    toast("🎉 ברוך הבא ל-MonoLink!", "success");
-    // onAuthStateChanged handles navigation
-  } catch(e) {
-    showErr(errEl, authErrMsg(e.code));
-    setLoading("btn-verify-otp", false);
+  saveSession({ uid: found.uid, email, name: found.name });
+  loginSuccess(found.uid, found.name, email);
+}
+
+function loginSuccess(uid, name, email) {
+  currentUser = { uid, name, email };
+  const data  = getUserData(uid) || createDefaultData(uid, name, email);
+  userData    = data;
+  links       = data.links || [];
+  activeTheme = data.theme || 0;
+
+  showLoginTransition("ברוך הבא, " + name + "! 🚀");
+  setTimeout(() => {
+    applyTheme(activeTheme);
+    renderNavAuth();
+    navGo("dashboard", document.getElementById("ntab-dashboard"));
+    renderAll();
+    setTimeout(() => toast("👋 שלום, " + name + "!", "success"), 400);
+  }, 600);
+}
+
+function renderAll() {
+  renderProfile();
+  renderLinksListUpgraded();
+  renderPublicView();
+  renderThemeRow();
+  renderAnalytics();
+  updateBulkBar();
+
+  const nameField = document.getElementById("settings-name");
+  const bioField  = document.getElementById("settings-bio");
+  if (nameField) nameField.value = userData.displayName || "";
+  if (bioField)  { bioField.value = userData.bio || ""; updateBioCounter(); }
+
+  const slug    = slugOf(userData.displayName || "user");
+  const shareEl = document.getElementById("share-url");
+  if (shareEl) shareEl.textContent = "monolink.app/u/" + slug;
+
+  const joined   = userData.createdAt ? new Date(userData.createdAt) : null;
+  const joinedEl = document.getElementById("dash-joined");
+  if (joinedEl && joined) joinedEl.textContent = "חבר מ: " + joined.toLocaleDateString("he-IL");
+
+  animateCountUp("s-links",  links.length,              600);
+  animateCountUp("s-clicks", userData.totalClicks || 0, 800);
+  animateCountUp("s-views",  userData.totalViews  || 0, 1000);
+
+  if (!links.length && !sessionStorage.getItem("ml_onboard")) {
+    sessionStorage.setItem("ml_onboard","1");
+    setTimeout(() => toast("💡 לחץ '+ הוסף לינק' כדי להתחיל", "success"), 1200);
   }
 }
-window.doVerifyOtp = doVerifyOtp;
 
-/* ──────────────────────────────────────────────────────────────
-   AUTH — GOOGLE LOGIN (no email required)
-────────────────────────────────────────────────────────────── */
-async function doGoogleLogin() {
-  try {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-    toast("✅ כניסה עם Google הצליחה!", "success");
-    // onAuthStateChanged handles navigation
-  } catch(e) {
-    if (e.code !== "auth/popup-closed-by-user") {
-      toast("❌ " + authErrMsg(e.code), "error");
-    }
-  }
+/* ── PERSIST DATA ── */
+function persist() {
+  if (!currentUser) return;
+  userData.links       = links;
+  userData.theme       = activeTheme;
+  saveUserData(currentUser.uid, userData);
+
+  setEl("s-links",  links.length);
+  setEl("s-clicks", userData.totalClicks || 0);
+  setEl("s-views",  userData.totalViews  || 0);
+
+  const slug = slugOf(userData.displayName || "user");
+  const shareEl = document.getElementById("share-url");
+  if (shareEl) shareEl.textContent = "monolink.app/u/" + slug;
 }
-window.doGoogleLogin = doGoogleLogin;
 
-/* ──────────────────────────────────────────────────────────────
-   AUTH — FORGOT PASSWORD
-────────────────────────────────────────────────────────────── */
-async function doForgotPassword() {
-  const email = document.getElementById("login-email").value.trim();
-  if (!email) { toast("⚠️ הכנס אימייל בשדה למעלה", "warn"); return; }
-  try {
-    await sendPasswordResetEmail(auth, email);
-    toast("📧 נשלח אימייל לאיפוס סיסמה!", "success");
-  } catch(e) { toast("❌ " + authErrMsg(e.code), "error"); }
-}
-window.doForgotPassword = doForgotPassword;
-
-/* ──────────────────────────────────────────────────────────────
-   AUTH — SIGN OUT
-────────────────────────────────────────────────────────────── */
-async function doSignOut() {
+/* ── SIGN OUT ── */
+function doSignOut() {
   if (!confirm("להתנתק?")) return;
-  await signOut(auth);
+  clearSession();
+  currentUser = null; links = []; userData = {};
+  renderNavGuest();
+  navGo("auth", null);
   toast("👋 להתראות!");
 }
 window.doSignOut = doSignOut;
 
-/* ──────────────────────────────────────────────────────────────
-   AUTH — ERROR MESSAGES
-────────────────────────────────────────────────────────────── */
-function authErrMsg(code) {
-  const m = {
-    "auth/user-not-found":        "לא נמצא משתמש עם אימייל זה",
-    "auth/wrong-password":        "סיסמה שגויה",
-    "auth/email-already-in-use":  "אימייל כבר רשום במערכת",
-    "auth/invalid-email":         "כתובת אימייל לא תקינה",
-    "auth/weak-password":         "הסיסמה חלשה מדי",
-    "auth/popup-closed-by-user":  "החלון נסגר לפני הכניסה",
-    "auth/too-many-requests":     "יותר מדי ניסיונות, נסה מאוחר יותר",
-    "auth/network-request-failed":"שגיאת רשת, בדוק חיבור",
-    "auth/invalid-credential":    "פרטי כניסה שגויים",
-    "auth/user-disabled":         "החשבון הושבת",
-  };
-  return m[code] || "שגיאה: " + code;
+function showForgotMsg() {
+  const email = document.getElementById("login-email").value.trim().toLowerCase();
+  if (!email) { toast("⚠️ הכנס אימייל בשדה למעלה", "warn"); return; }
+  const users = getUsers();
+  if (!users[email]) { toast("❌ אימייל לא נמצא במערכת", "error"); return; }
+  toast("🔑 הסיסמה שלך: " + users[email].pw, "success");
+}
+window.showForgotMsg = showForgotMsg;
+
+/* ── NAV ── */
+function navGo(name, btn) {
+  prevPage    = currentPage;
+  currentPage = name;
+  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
+    const el = document.getElementById("page-" + p);
+    if (el) el.classList.toggle("active", p === name);
+  });
+  if (name === "public" && currentUser) {
+    userData.totalViews = (userData.totalViews || 0) + 1;
+    persist();
+  }
+  if (name === "analytics") renderFullAnalyticsPage();
+}
+window.navGo = navGo;
+
+function navBack() { navGo(prevPage || (currentUser ? "dashboard" : "auth"), null); }
+window.navBack = navBack;
+
+function handleBrandClick() {
+  if (currentUser) navGo("dashboard", document.getElementById("ntab-dashboard"));
+}
+window.handleBrandClick = handleBrandClick;
+
+function renderNavAuth() {
+  document.getElementById("nav-center").style.display = "flex";
+  const r = document.getElementById("nav-right");
+  r.innerHTML = `<div class="nav-avatar-placeholder">${(userData.displayName || "?")[0].toUpperCase()}</div>`;
+}
+function renderNavGuest() {
+  document.getElementById("nav-center").style.display = "none";
+  document.getElementById("nav-right").innerHTML = `
+    <button class="btn btn-outline btn-sm" onclick="switchAuthTab('login')">כניסה</button>
+    <button class="btn btn-primary btn-sm btn-glow" onclick="switchAuthTab('register')">הרשמה</button>`;
 }
 
-function showErr(el, msg)     { el.textContent = msg; el.classList.add("show"); }
-function showSuccessMsg(el, msg) { el.textContent = msg; el.classList.add("show"); }
+function switchAuthTab(tab) {
+  document.getElementById("form-login").style.display    = tab==="login"    ? "block" : "none";
+  document.getElementById("form-register").style.display = tab==="register" ? "block" : "none";
+  document.getElementById("atab-login").classList.toggle("active",    tab==="login");
+  document.getElementById("atab-register").classList.toggle("active", tab==="register");
+  document.getElementById("login-error").classList.remove("show");
+  document.getElementById("reg-error").classList.remove("show");
+  document.getElementById("reg-success").classList.remove("show");
+  if (!currentUser) {
+    ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
+      const el = document.getElementById("page-"+p);
+      if (el) el.classList.toggle("active", p==="auth");
+    });
+    currentPage = "auth";
+  }
+}
+window.switchAuthTab = switchAuthTab;
 
-/* ──────────────────────────────────────────────────────────────
-   PASSWORD STRENGTH
-────────────────────────────────────────────────────────────── */
+/* ── PASSWORD UTILS ── */
+window.togglePwVis = function(inputId, iconId) {
+  const inp=document.getElementById(inputId), icon=document.getElementById(iconId);
+  if (!inp||!icon) return;
+  if (inp.type==="password") { inp.type="text";     icon.textContent="🙈"; }
+  else                        { inp.type="password"; icon.textContent="👁"; }
+};
+
 window.checkPwStrength = function(val) {
   let score = 0;
-  if (val.length >= 6)  score++;
-  if (val.length >= 10) score++;
-  if (/[A-Z]/.test(val) || /[0-9]/.test(val)) score++;
+  if (val.length>=6)  score++;
+  if (val.length>=10) score++;
+  if (/[A-Z]/.test(val)||/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
-  const labels = ["", "חלשה", "בינונית", "טובה", "חזקה"];
-  const colors = ["", "fill-1", "fill-2", "fill-3", "fill-4"];
-  for (let i = 1; i <= 4; i++) {
-    const seg = document.getElementById("ps" + i);
-    if (seg) seg.className = "pw-seg " + (i <= score ? colors[score] : "");
+  const labels=["","חלשה","בינונית","טובה","חזקה"];
+  const colors=["","fill-1","fill-2","fill-3","fill-4"];
+  for (let i=1;i<=4;i++) {
+    const seg=document.getElementById("ps"+i);
+    if (seg) seg.className="pw-seg "+(i<=score?colors[score]:"");
   }
-  const lbl = document.getElementById("pw-lbl");
-  if (lbl) lbl.textContent = val ? "עוצמה: " + labels[score] : "";
+  const lbl=document.getElementById("pw-lbl");
+  if (lbl) lbl.textContent=val?"עוצמה: "+labels[score]:"";
 };
 
-window.togglePwVis = function(inputId, iconId) {
-  const inp  = document.getElementById(inputId);
-  const icon = document.getElementById(iconId);
-  if (!inp || !icon) return;
-  if (inp.type === "password") { inp.type = "text";     icon.textContent = "🙈"; }
-  else                         { inp.type = "password"; icon.textContent = "👁"; }
-};
-
-/* ──────────────────────────────────────────────────────────────
-   PROFILE RENDER
-────────────────────────────────────────────────────────────── */
+/* ── PROFILE ── */
 function renderProfile() {
   setEl("dash-name",  userData.displayName || "—");
   setEl("dash-email", userData.email       || "—");
   const inner = document.getElementById("dash-av-inner");
-  if (!inner) return;
-  if (userData.photoURL) {
-    inner.innerHTML = `<img class="profile-avatar-img" src="${esc(userData.photoURL)}" alt="avatar"/>`;
-  } else {
-    inner.innerHTML = `<div class="profile-avatar-ph">${(userData.displayName || "?")[0].toUpperCase()}</div>`;
-  }
+  if (inner) inner.innerHTML = `<div class="profile-avatar-ph">${(userData.displayName||"?")[0].toUpperCase()}</div>`;
 }
 
-/* ──────────────────────────────────────────────────────────────
-   LINKS LIST RENDER (with search + sort)
-────────────────────────────────────────────────────────────── */
+/* ── LINKS SORT + RENDER ── */
 function getSortedLinks() {
   let arr = [...links];
   if (searchQuery) arr = arr.filter(l =>
-    (l.title || "").toLowerCase().includes(searchQuery) ||
-    (l.url   || "").toLowerCase().includes(searchQuery)
+    (l.title||"").toLowerCase().includes(searchQuery) ||
+    (l.url  ||"").toLowerCase().includes(searchQuery)
   );
-  if (sortMode === "clicks") arr.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
-  if (sortMode === "alpha")  arr.sort((a, b) => (a.title  || "").localeCompare(b.title || "", "he"));
-  if (sortMode === "newest") arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  if (sortMode==="clicks") arr.sort((a,b)=>(b.clicks||0)-(a.clicks||0));
+  if (sortMode==="alpha")  arr.sort((a,b)=>(a.title||"").localeCompare(b.title||"","he"));
+  if (sortMode==="newest") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   return arr;
 }
 
@@ -1962,36 +1403,37 @@ function renderLinksListUpgraded() {
       </div>`;
     return;
   }
-  if (sorted.length === 0 && searchQuery) {
+  if (!sorted.length && searchQuery) {
     el.innerHTML = `<div class="empty-zone"><div class="empty-icon">🔍</div><div class="empty-title">אין תוצאות</div><p class="empty-sub">נסה חיפוש אחר</p></div>`;
     return;
   }
-  el.innerHTML = sorted.map((l, i) => `
-    <div class="link-row${selectedIds.has(l.id) ? " selected" : ""}" data-id="${l.id}"
-         draggable="${sortMode === "manual"}"
-         style="animation-delay:${i * 0.04}s"
+
+  el.innerHTML = sorted.map((l,i) => `
+    <div class="link-row${selectedIds.has(l.id)?" selected":""}" data-id="${l.id}"
+         draggable="${sortMode==="manual"}"
+         style="animation-delay:${i*0.04}s"
          ondragstart="dragStart(event,'${l.id}')"
          ondragover="dragOver(event)"
          ondrop="dragDrop(event,'${l.id}')"
          ondragend="dragEnd(event)"
          ondblclick="toggleSelectLink('${l.id}',this)">
-      <span class="drag-grip" title="גרור לסידור" style="opacity:${sortMode === "manual" ? 1 : 0.2}">⠿</span>
-      <div class="link-icon-box">${l.emoji || "🔗"}</div>
+      <span class="drag-grip" title="גרור לסידור" style="opacity:${sortMode==="manual"?1:0.2}">⠿</span>
+      <div class="link-icon-box">${l.emoji||"🔗"}</div>
       <div class="link-meta">
         <div class="link-meta-title">${esc(l.title)}</div>
         <div class="link-meta-url">${esc(l.url)}</div>
         <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.2rem;flex-wrap:wrap;">
-          ${l.clicks ? `<div class="link-meta-clicks">👆 ${l.clicks} קליקים</div>` : ""}
-          ${l.desc   ? `<div class="link-meta-desc">💬 ${esc(l.desc)}</div>` : ""}
-          ${l.active === false
-            ? `<span class="badge badge-warn" style="font-size:0.65rem;">כבוי</span>`
-            : `<span class="badge badge-green" style="font-size:0.65rem;">פעיל</span>`}
+          ${l.clicks?`<div class="link-meta-clicks">👆 ${l.clicks} קליקים</div>`:""}
+          ${l.desc  ?`<div class="link-meta-desc">💬 ${esc(l.desc)}</div>`:""}
+          ${l.active===false
+            ?`<span class="badge badge-warn" style="font-size:0.65rem;">כבוי</span>`
+            :`<span class="badge badge-green" style="font-size:0.65rem;">פעיל</span>`}
         </div>
       </div>
       <div class="link-controls">
-        <div class="toggle ${l.active !== false ? "on" : ""}"
+        <div class="toggle ${l.active!==false?"on":""}"
              onclick="toggleLink('${l.id}')"
-             title="${l.active !== false ? "פעיל — לחץ לכיבוי" : "כבוי — לחץ להפעלה"}">
+             title="${l.active!==false?"פעיל — לחץ לכיבוי":"כבוי — לחץ להפעלה"}">
         </div>
         <button class="btn btn-ghost btn-icon-sq btn-sm" onclick="editLink('${l.id}')"    title="ערוך">✏️</button>
         <button class="btn btn-danger btn-icon-sq btn-sm" onclick="deleteLink('${l.id}')" title="מחק">🗑</button>
@@ -2000,198 +1442,60 @@ function renderLinksListUpgraded() {
   `).join("");
 }
 
-/* ──────────────────────────────────────────────────────────────
-   PUBLIC VIEW RENDER
-────────────────────────────────────────────────────────────── */
+/* ── PUBLIC VIEW ── */
 function renderPublicView() {
   setEl("pub-name", userData.displayName || "MonoLink");
   setEl("pub-bio",  userData.bio || "");
 
-  const avContainer = document.getElementById("pub-av-container");
-  if (avContainer) {
-    if (userData.photoURL) {
-      avContainer.innerHTML = `<img class="pub-avatar-img" src="${esc(userData.photoURL)}" alt="avatar"/>`;
-    } else {
-      const letter = (userData.displayName || "M")[0].toUpperCase();
-      avContainer.innerHTML = `<div class="pub-avatar-ph">${letter}</div>`;
-    }
-  }
+  const avC = document.getElementById("pub-av-container");
+  if (avC) avC.innerHTML = `<div class="pub-avatar-ph">${(userData.displayName||"M")[0].toUpperCase()}</div>`;
 
   const pb = document.getElementById("pub-back-bar");
-  if (pb) {
-    pb.innerHTML = user
-      ? `<button class="btn btn-ghost btn-sm" onclick="navGo('dashboard',document.getElementById('ntab-dashboard'))">← חזור לעריכה</button>`
-      : "";
-  }
+  if (pb) pb.innerHTML = currentUser
+    ? `<button class="btn btn-ghost btn-sm" onclick="navGo('dashboard',document.getElementById('ntab-dashboard'))">← חזור לעריכה</button>`
+    : "";
 
   const activeLinks = links.filter(l => l.active !== false);
   const pl = document.getElementById("pub-links");
   if (!pl) return;
+
   if (!activeLinks.length) {
     pl.innerHTML = `<div class="empty-zone"><div class="empty-icon">🔗</div><p class="empty-sub">אין לינקים להצגה</p></div>`;
     return;
   }
+
   pl.innerHTML = activeLinks.map(l => `
-    <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="pub-link-item" onclick="recClick('${l.id}')">
-      <span class="pub-link-icon">${l.emoji || "🔗"}</span>
+    <div class="pub-link-item" onclick="openLink('${esc(l.url)}','${l.id}')">
+      <span class="pub-link-icon">${l.emoji||"🔗"}</span>
       <span class="pub-link-label">${esc(l.title)}</span>
       <span class="pub-link-arrow">←</span>
-    </a>
+    </div>
   `).join("");
 }
 
-/* ──────────────────────────────────────────────────────────────
-   ANALYTICS RENDER
-────────────────────────────────────────────────────────────── */
-function renderAnalytics() {
-  renderKPIs("kpi-grid");
-  renderWeeklyChart("weekly-chart", "week-labels");
-  renderClicksBars("clicks-bars");
-  renderSourceBars("source-bars");
-  renderDeviceBars("device-bars");
+/* ── OPEN LINK (tracks click + opens in new tab) ── */
+window.openLink = function(url, id) {
+  if (!url) return;
+  // track click
+  links = links.map(l => l.id===id ? {...l, clicks:(l.clicks||0)+1} : l);
+  const today = new Date().getDay();
+  if (!userData.weeklyClicks) userData.weeklyClicks = [0,0,0,0,0,0,0];
+  userData.weeklyClicks[today] = (userData.weeklyClicks[today]||0) + 1;
+  userData.totalClicks = (userData.totalClicks||0) + 1;
+  persist();
+  renderLinksListUpgraded();
   renderMiniAnalytics();
-}
-
-function renderFullAnalyticsPage() {
-  renderKPIs("kpi-grid-full");
-  renderWeeklyChart("weekly-chart-full", "week-labels-full");
-  renderClicksBars("clicks-bars-full");
-  renderSourceBars("source-bars-full");
-  renderDeviceBars("device-bars-full");
-}
-
-function renderKPIs(gridId) {
-  const el = document.getElementById(gridId);
-  if (!el) return;
-  const ctr = userData.totalViews ? Math.round(((userData.totalClicks || 0) / (userData.totalViews || 1)) * 100) : 0;
-  const kpis = [
-    { icon: "👁",  val: userData.totalViews  || 0, lbl: "צפיות",      trend: "↑ +12% השבוע" },
-    { icon: "🖱",  val: userData.totalClicks || 0, lbl: "קליקים",     trend: "↑ +8% השבוע"  },
-    { icon: "📈",  val: ctr + "%",                 lbl: "שיעור קליק", trend: ""              },
-    { icon: "🔗",  val: links.length,              lbl: "לינקים",     trend: ""              },
-  ];
-  el.innerHTML = kpis.map((k, i) => `
-    <div class="kpi-card" style="animation-delay:${i * 0.07}s">
-      <div class="kpi-icon">${k.icon}</div>
-      <div class="kpi-val">${k.val}</div>
-      <div class="kpi-lbl">${k.lbl}</div>
-      ${k.trend ? `<div class="kpi-trend">${k.trend}</div>` : ""}
-    </div>
-  `).join("");
-}
-
-function renderWeeklyChart(chartId, labelsId) {
-  const days   = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
-  const weekly = Array.from({ length: 7 }, (_, i) => (userData.weeklyClicks || [])[i] || 0);
-  const mx     = Math.max(...weekly, 1);
-  const wc     = document.getElementById(chartId);
-  const wl     = document.getElementById(labelsId);
-  if (wc) wc.innerHTML = weekly.map(v => `<div class="week-bar" style="height:${Math.max(4, Math.round((v / mx) * 76))}px;" title="${v} קליקים"></div>`).join("");
-  if (wl) wl.innerHTML = days.map(d => `<div class="week-lbl">${d}</div>`).join("");
-}
-
-function renderClicksBars(elId) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  if (!links.length) { el.innerHTML = `<p class="text-muted text-sm" style="padding:1rem 0;">אין נתונים עדיין</p>`; return; }
-  const mx = Math.max(...links.map(l => l.clicks || 0), 1);
-  el.innerHTML = links.map(l => `
-    <div class="bar-row">
-      <div class="bar-lbl">${l.emoji || "🔗"} ${esc(l.title)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((l.clicks || 0) / mx) * 100)}%"></div></div>
-      <div class="bar-num">${l.clicks || 0}</div>
-    </div>
-  `).join("");
-}
-
-function renderSourceBars(elId = "source-bars") {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  const sources = [
-    { lbl: "ישיר", val: 40 }, { lbl: "אינסטגרם", val: 28 },
-    { lbl: "ביוגרפיה", val: 16 }, { lbl: "טיקטוק", val: 10 }, { lbl: "אחר", val: 6 }
-  ];
-  el.innerHTML = sources.map(s => `
-    <div class="bar-row">
-      <div class="bar-lbl">${s.lbl}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${s.val}%"></div></div>
-      <div class="bar-num">${s.val}%</div>
-    </div>
-  `).join("");
-}
-
-function renderDeviceBars(elId = "device-bars") {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  const devs = [{ lbl: "📱 מובייל", val: 62 }, { lbl: "💻 דסקטופ", val: 30 }, { lbl: "📟 טאבלט", val: 8 }];
-  el.innerHTML = devs.map(d => `
-    <div class="bar-row">
-      <div class="bar-lbl">${d.lbl}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${d.val}%"></div></div>
-      <div class="bar-num">${d.val}%</div>
-    </div>
-  `).join("");
-}
-
-function renderMiniAnalytics() {
-  const el = document.getElementById("mini-analytics");
-  if (!el) return;
-  if (!links.length) { el.innerHTML = `<p class="text-muted text-sm">אין נתונים</p>`; return; }
-  const mx = Math.max(...links.map(l => l.clicks || 0), 1);
-  el.innerHTML = links.map(l => `
-    <div class="bar-row">
-      <div class="bar-lbl">${l.emoji || "🔗"} ${esc(l.title)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((l.clicks || 0) / mx) * 100)}%"></div></div>
-      <div class="bar-num">${l.clicks || 0}</div>
-    </div>
-  `).join("");
-}
-
-/* ──────────────────────────────────────────────────────────────
-   THEME
-────────────────────────────────────────────────────────────── */
-function renderThemeRow() {
-  const el = document.getElementById("theme-row");
-  if (!el) return;
-  el.innerHTML = THEMES.map((t, i) => `
-    <div class="theme-swatch ${i === activeTheme ? "active" : ""}"
-         style="background:linear-gradient(135deg,${t.c1},${t.c2})"
-         onclick="pickTheme(${i})" title="${t.name}"></div>
-  `).join("");
-}
-
-window.pickTheme = async function(i) {
-  activeTheme = i;
-  applyTheme(i);
-  renderThemeRow();
-  if (user) await updateDoc(doc(db, "users", user.uid), { theme: i });
+  // open in new tab
+  window.open(url, "_blank", "noopener,noreferrer");
 };
 
-function applyTheme(i) {
-  const t = THEMES[i] || THEMES[0];
-  const r = document.documentElement.style;
-  r.setProperty("--cyan",   t.c1);
-  r.setProperty("--violet", t.c2);
-  r.setProperty("--pink",   t.c3);
-  r.setProperty("--grad-main", `linear-gradient(135deg, ${t.c1} 0%, ${t.c2} 50%, ${t.c3} 100%)`);
-  r.setProperty("--border",       `rgba(${hexToRgb(t.c1)},0.12)`);
-  r.setProperty("--border-glow",  `rgba(${hexToRgb(t.c1)},0.4)`);
-  r.setProperty("--glow-cyan",    `0 0 30px rgba(${hexToRgb(t.c1)},0.2)`);
-}
-function hexToRgb(hex) {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : "0,200,255";
-}
-
-/* ──────────────────────────────────────────────────────────────
-   MODAL — ADD / EDIT LINK
-────────────────────────────────────────────────────────────── */
+/* ── MODAL ── */
 function openModal(id) {
   editId   = id || null;
   selEmoji = "🔗";
   const heading = document.getElementById("modal-heading");
   if (id) {
-    const lk = links.find(l => l.id === id);
+    const lk = links.find(l=>l.id===id);
     if (lk) {
       document.getElementById("m-title").value = lk.title || "";
       document.getElementById("m-url").value   = lk.url   || "";
@@ -2225,63 +1529,65 @@ function renderEmojiGrid() {
   const grid = document.getElementById("emoji-grid");
   if (!grid) return;
   grid.innerHTML = EMOJIS.map(em =>
-    `<div class="emoji-cell ${em === selEmoji ? "sel" : ""}" onclick="selectEmoji('${em}')">${em}</div>`
+    `<div class="emoji-cell ${em===selEmoji?"sel":""}" onclick="selectEmoji('${em}')">${em}</div>`
   ).join("");
 }
-
 window.selectEmoji = function(e) { selEmoji = e; renderEmojiGrid(); };
 
-async function saveLink() {
+function saveLink() {
   const title = document.getElementById("m-title").value.trim();
   const url   = document.getElementById("m-url").value.trim();
   const desc  = document.getElementById("m-desc").value.trim();
   if (!title) { toast("⚠️ נא להזין כותרת", "warn"); return; }
   if (!url)   { toast("⚠️ נא להזין URL",    "warn"); return; }
+
   let finalUrl = url;
   if (!/^https?:\/\//i.test(finalUrl)) finalUrl = "https://" + finalUrl;
 
-  const btn = document.getElementById("modal-save");
-  if (btn) { btn.classList.add("btn-loading"); btn.innerHTML = `<div class="spinner"></div><span>שומר...</span>`; }
-
-  try {
-    if (editId) {
-      links = links.map(l => l.id === editId ? { ...l, title, url: finalUrl, desc, emoji: selEmoji } : l);
-      toast("✅ הלינק עודכן", "success");
-    } else {
-      links.push({ id: uid(), title, url: finalUrl, desc, emoji: selEmoji, active: true, clicks: 0, createdAt: Date.now() });
-      toast("✅ לינק נוסף!", "success");
-    }
-    await updateDoc(doc(db, "users", user.uid), { links });
-    closeModal();
-  } catch(e) {
-    toast("❌ שגיאה: " + e.message, "error");
-  } finally {
-    if (btn) { btn.classList.remove("btn-loading"); btn.innerHTML = "💾 שמור"; }
+  if (editId) {
+    links = links.map(l => l.id===editId ? {...l, title, url:finalUrl, desc, emoji:selEmoji} : l);
+    toast("✅ הלינק עודכן", "success");
+  } else {
+    links.push({ id:uid(), title, url:finalUrl, desc, emoji:selEmoji, active:true, clicks:0, createdAt:Date.now() });
+    toast("✅ לינק נוסף!", "success");
   }
+
+  persist();
+  renderLinksListUpgraded();
+  renderPublicView();
+  renderAnalytics();
+  closeModal();
+  setEl("s-links", links.length);
 }
 window.saveLink = saveLink;
 
-function editLink(id) { openModal(id); }
+function editLink(id)  { openModal(id); }
 window.editLink = editLink;
 
-async function deleteLink(id) {
+function deleteLink(id) {
   if (!confirm("למחוק לינק זה?")) return;
-  links = links.filter(l => l.id !== id);
-  await updateDoc(doc(db, "users", user.uid), { links });
+  links = links.filter(l => l.id!==id);
+  selectedIds.delete(id);
+  persist();
+  renderLinksListUpgraded();
+  renderPublicView();
+  renderAnalytics();
+  updateBulkBar();
+  setEl("s-links", links.length);
   toast("🗑 הלינק נמחק");
 }
 window.deleteLink = deleteLink;
 
-async function toggleLink(id) {
-  links = links.map(l => l.id === id ? { ...l, active: l.active === false ? true : false } : l);
-  await updateDoc(doc(db, "users", user.uid), { links });
+function toggleLink(id) {
+  links = links.map(l => l.id===id ? {...l, active: l.active===false} : l);
+  persist();
+  renderLinksListUpgraded();
+  renderPublicView();
 }
 window.toggleLink = toggleLink;
 
-/* ──────────────────────────────────────────────────────────────
-   DRAG & DROP REORDER
-────────────────────────────────────────────────────────────── */
-window.dragStart = function(e, id) {
+/* ── DRAG & DROP ── */
+window.dragStart = function(e,id) {
   draggedId = id;
   e.currentTarget.classList.add("dragging");
   e.dataTransfer.effectAllowed = "move";
@@ -2291,74 +1597,75 @@ window.dragOver = function(e) {
   e.dataTransfer.dropEffect = "move";
   e.currentTarget.classList.add("drag-over");
 };
-window.dragDrop = async function(e, targetId) {
+window.dragDrop = function(e,targetId) {
   e.preventDefault();
   e.currentTarget.classList.remove("drag-over");
-  if (!draggedId || draggedId === targetId) return;
-  const from = links.findIndex(l => l.id === draggedId);
-  const to   = links.findIndex(l => l.id === targetId);
-  if (from < 0 || to < 0) return;
-  links.splice(to, 0, links.splice(from, 1)[0]);
-  await updateDoc(doc(db, "users", user.uid), { links });
+  if (!draggedId || draggedId===targetId) return;
+  const from = links.findIndex(l=>l.id===draggedId);
+  const to   = links.findIndex(l=>l.id===targetId);
+  if (from<0||to<0) return;
+  links.splice(to, 0, links.splice(from,1)[0]);
   draggedId = null;
+  persist();
+  renderLinksListUpgraded();
 };
 window.dragEnd = function(e) {
   e.currentTarget.classList.remove("dragging");
-  document.querySelectorAll(".link-row").forEach(r => r.classList.remove("drag-over"));
+  document.querySelectorAll(".link-row").forEach(r=>r.classList.remove("drag-over"));
 };
 
-/* ──────────────────────────────────────────────────────────────
-   SEARCH + SORT
-────────────────────────────────────────────────────────────── */
+/* ── SEARCH + SORT ── */
 window.onLinkSearch = function(val) {
   searchQuery = val.toLowerCase().trim();
   renderLinksListUpgraded();
 };
-
 window.setSortMode = function(mode) {
   sortMode = mode;
-  document.querySelectorAll(".sort-btn").forEach(b => b.classList.toggle("active", b.dataset.sort === mode));
+  document.querySelectorAll(".sort-btn").forEach(b=>b.classList.toggle("active", b.dataset.sort===mode));
   renderLinksListUpgraded();
 };
 
-/* ──────────────────────────────────────────────────────────────
-   BULK ACTIONS
-────────────────────────────────────────────────────────────── */
-window.toggleSelectLink = function(id, el) {
+/* ── BULK ACTIONS ── */
+window.toggleSelectLink = function(id,el) {
   if (selectedIds.has(id)) { selectedIds.delete(id); el.classList.remove("selected"); }
   else                      { selectedIds.add(id);    el.classList.add("selected"); }
   updateBulkBar();
 };
-
 function updateBulkBar() {
-  const bar = document.getElementById("bulk-bar");
+  const bar=document.getElementById("bulk-bar");
   if (!bar) return;
-  if (selectedIds.size > 0) {
-    bar.style.display = "flex";
+  if (selectedIds.size>0) {
+    bar.style.display="flex";
     bar.querySelector(".bulk-count").textContent = selectedIds.size + " נבחרו";
   } else {
-    bar.style.display = "none";
+    bar.style.display="none";
   }
 }
 window.updateBulkBar = updateBulkBar;
 
-window.bulkDelete = async function() {
+window.bulkDelete = function() {
   if (!selectedIds.size) return;
   if (!confirm(`למחוק ${selectedIds.size} לינקים?`)) return;
-  links = links.filter(l => !selectedIds.has(l.id));
+  links = links.filter(l=>!selectedIds.has(l.id));
   selectedIds.clear();
-  await updateDoc(doc(db, "users", user.uid), { links });
+  persist();
+  renderLinksListUpgraded();
+  renderPublicView();
+  renderAnalytics();
   updateBulkBar();
+  setEl("s-links", links.length);
   toast("🗑 הלינקים נמחקו", "success");
 };
 
-window.bulkToggle = async function(active) {
+window.bulkToggle = function(active) {
   if (!selectedIds.size) return;
-  links = links.map(l => selectedIds.has(l.id) ? { ...l, active } : l);
+  links = links.map(l=>selectedIds.has(l.id)?{...l,active}:l);
   selectedIds.clear();
-  await updateDoc(doc(db, "users", user.uid), { links });
+  persist();
+  renderLinksListUpgraded();
+  renderPublicView();
   updateBulkBar();
-  toast(active ? "✅ הלינקים הופעלו" : "⏸ הלינקים כובו", "success");
+  toast(active?"✅ הלינקים הופעלו":"⏸ הלינקים כובו", "success");
 };
 
 window.clearSelection = function() {
@@ -2367,16 +1674,14 @@ window.clearSelection = function() {
   renderLinksListUpgraded();
 };
 
-/* ──────────────────────────────────────────────────────────────
-   EXPORT / IMPORT LINKS
-────────────────────────────────────────────────────────────── */
+/* ── EXPORT / IMPORT ── */
 window.exportLinks = function() {
-  if (!links.length) { toast("אין לינקים לייצוא", "warn"); return; }
-  const data = JSON.stringify({ displayName: userData.displayName, bio: userData.bio, links }, null, 2);
-  const blob = new Blob([data], { type: "application/json" });
-  const a    = document.createElement("a");
-  a.href     = URL.createObjectURL(blob);
-  a.download = `monolink_${slugOf(userData.displayName || "export")}.json`;
+  if (!links.length) { toast("אין לינקים לייצוא","warn"); return; }
+  const data = JSON.stringify({ displayName:userData.displayName, bio:userData.bio, links }, null, 2);
+  const blob  = new Blob([data], { type:"application/json" });
+  const a     = document.createElement("a");
+  a.href      = URL.createObjectURL(blob);
+  a.download  = `monolink_${slugOf(userData.displayName||"export")}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
   toast("📦 הלינקים יוצאו", "success");
@@ -2386,263 +1691,338 @@ window.importLinks = function() {
   const input    = document.createElement("input");
   input.type     = "file";
   input.accept   = ".json";
-  input.onchange = async e => {
+  input.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
-    try {
-      const text     = await file.text();
-      const parsed   = JSON.parse(text);
-      const imported = (parsed.links || []).map(l => ({ ...l, id: uid(), clicks: 0, createdAt: Date.now() }));
-      if (!imported.length) { toast("⚠️ לא נמצאו לינקים בקובץ", "warn"); return; }
-      links = [...links, ...imported];
-      await updateDoc(doc(db, "users", user.uid), { links });
-      toast(`✅ יובאו ${imported.length} לינקים!`, "success");
-    } catch(err) {
-      toast("❌ שגיאה בקריאת הקובץ", "error");
-    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed   = JSON.parse(ev.target.result);
+        const imported = (parsed.links||[]).map(l=>({...l, id:uid(), clicks:0, createdAt:Date.now()}));
+        if (!imported.length) { toast("⚠️ לא נמצאו לינקים בקובץ","warn"); return; }
+        links = [...links, ...imported];
+        persist();
+        renderLinksListUpgraded();
+        renderPublicView();
+        renderAnalytics();
+        setEl("s-links", links.length);
+        toast(`✅ יובאו ${imported.length} לינקים!`, "success");
+      } catch(err) { toast("❌ שגיאה בקריאת הקובץ","error"); }
+    };
+    reader.readAsText(file);
   };
   input.click();
 };
 
-/* ──────────────────────────────────────────────────────────────
-   SETTINGS SAVE
-────────────────────────────────────────────────────────────── */
-async function saveSettings() {
-  if (!user) return;
+/* ── SETTINGS ── */
+function saveSettings() {
+  if (!currentUser) return;
   const name = document.getElementById("settings-name").value.trim();
   const bio  = document.getElementById("settings-bio").value.trim();
-  if (!name) { toast("⚠️ שם תצוגה לא יכול להיות ריק", "warn"); return; }
-  try {
-    await updateDoc(doc(db, "users", user.uid), { displayName: name, bio });
-    await updateProfile(user, { displayName: name });
-    toast("✅ ההגדרות נשמרו", "success");
-  } catch(e) { toast("❌ שגיאה: " + e.message, "error"); }
+  if (!name) { toast("⚠️ שם תצוגה לא יכול להיות ריק","warn"); return; }
+  userData.displayName = name;
+  userData.bio         = bio;
+  persist();
+
+  // update user record
+  const users = getUsers();
+  if (users[currentUser.email]) { users[currentUser.email].name = name; saveUsers(users); }
+  currentUser.name = name;
+
+  renderProfile();
+  renderPublicView();
+  renderNavAuth();
+  const slug = slugOf(name);
+  const shareEl = document.getElementById("share-url");
+  if (shareEl) shareEl.textContent = "monolink.app/u/" + slug;
+  toast("✅ ההגדרות נשמרו", "success");
 }
 window.saveSettings = saveSettings;
 
-/* ──────────────────────────────────────────────────────────────
-   BIO CHARACTER COUNTER
-────────────────────────────────────────────────────────────── */
 function updateBioCounter() {
-  const bioField  = document.getElementById("settings-bio");
-  const counter   = document.getElementById("bio-counter");
-  if (!bioField || !counter) return;
-  const len = bioField.value.length;
+  const bioField=document.getElementById("settings-bio");
+  const counter=document.getElementById("bio-counter");
+  if (!bioField||!counter) return;
+  const len=bioField.value.length;
   counter.textContent = len + " / 160";
-  counter.style.color = len > 140 ? "var(--pink)" : len > 100 ? "var(--gold)" : "var(--text-muted)";
-  if (len > 160) bioField.value = bioField.value.slice(0, 160);
+  counter.style.color = len>140?"var(--pink)":len>100?"var(--gold)":"var(--text-muted)";
+  if (len>160) bioField.value = bioField.value.slice(0,160);
 }
 const bioFieldEl = document.getElementById("settings-bio");
 if (bioFieldEl) bioFieldEl.addEventListener("input", updateBioCounter);
 
-/* ──────────────────────────────────────────────────────────────
-   RECORD CLICK / VIEW
-────────────────────────────────────────────────────────────── */
-window.recClick = async function(id) {
-  if (!user) return;
-  links = links.map(l => l.id === id ? { ...l, clicks: (l.clicks || 0) + 1 } : l);
-  const today  = new Date().getDay();
-  const weekly = Array.from({ length: 7 }, (_, i) => (userData.weeklyClicks || [])[i] || 0);
-  weekly[today] = (weekly[today] || 0) + 1;
-  try {
-    await updateDoc(doc(db, "users", user.uid), { links, totalClicks: increment(1), weeklyClicks: weekly });
-  } catch(e) { console.error("recClick error:", e); }
-};
-
-async function recordView() {
-  if (!user) return;
-  try {
-    await updateDoc(doc(db, "users", user.uid), { totalViews: increment(1) });
-  } catch(e) { console.error("recordView error:", e); }
+/* ── THEME ── */
+function renderThemeRow() {
+  const el = document.getElementById("theme-row");
+  if (!el) return;
+  el.innerHTML = THEMES.map((t,i) => `
+    <div class="theme-swatch ${i===activeTheme?"active":""}"
+         style="background:linear-gradient(135deg,${t.c1},${t.c2})"
+         onclick="pickTheme(${i})" title="${t.name}"></div>
+  `).join("");
 }
 
-/* ──────────────────────────────────────────────────────────────
-   SHARE / COPY / NATIVE
-────────────────────────────────────────────────────────────── */
+window.pickTheme = function(i) {
+  activeTheme = i;
+  applyTheme(i);
+  renderThemeRow();
+  if (currentUser) { userData.theme=i; persist(); }
+};
+
+function applyTheme(i) {
+  const t = THEMES[i] || THEMES[0];
+  const r = document.documentElement.style;
+  r.setProperty("--cyan",   t.c1);
+  r.setProperty("--violet", t.c2);
+  r.setProperty("--pink",   t.c3);
+  r.setProperty("--grad-main", `linear-gradient(135deg, ${t.c1} 0%, ${t.c2} 50%, ${t.c3} 100%)`);
+  r.setProperty("--border",      `rgba(${hexToRgb(t.c1)},0.12)`);
+  r.setProperty("--border-glow", `rgba(${hexToRgb(t.c1)},0.4)`);
+  r.setProperty("--glow-cyan",   `0 0 30px rgba(${hexToRgb(t.c1)},0.2)`);
+}
+
+/* ── ANALYTICS ── */
+function renderAnalytics() {
+  renderKPIs("kpi-grid");
+  renderWeeklyChart("weekly-chart","week-labels");
+  renderClicksBars("clicks-bars");
+  renderSourceBars("source-bars");
+  renderDeviceBars("device-bars");
+  renderMiniAnalytics();
+}
+function renderFullAnalyticsPage() {
+  renderKPIs("kpi-grid-full");
+  renderWeeklyChart("weekly-chart-full","week-labels-full");
+  renderClicksBars("clicks-bars-full");
+  renderSourceBars("source-bars-full");
+  renderDeviceBars("device-bars-full");
+}
+
+function renderKPIs(gridId) {
+  const el = document.getElementById(gridId);
+  if (!el) return;
+  const ctr = userData.totalViews
+    ? Math.round(((userData.totalClicks||0) / (userData.totalViews||1)) * 100) : 0;
+  const kpis = [
+    { icon:"👁",  val:userData.totalViews ||0, lbl:"צפיות",      trend:"↑ +12% השבוע" },
+    { icon:"🖱",  val:userData.totalClicks||0, lbl:"קליקים",     trend:"↑ +8% השבוע"  },
+    { icon:"📈", val:ctr+"%",                  lbl:"שיעור קליק", trend:""              },
+    { icon:"🔗",  val:links.length,             lbl:"לינקים",     trend:""              },
+  ];
+  el.innerHTML = kpis.map((k,i) => `
+    <div class="kpi-card" style="animation-delay:${i*0.07}s">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+      ${k.trend?`<div class="kpi-trend">${k.trend}</div>`:""}
+    </div>
+  `).join("");
+}
+
+function renderWeeklyChart(chartId,labelsId) {
+  const days   = ["א","ב","ג","ד","ה","ו","ש"];
+  const weekly = Array.from({length:7},(_,i)=>(userData.weeklyClicks||[])[i]||0);
+  const mx     = Math.max(...weekly, 1);
+  const wc=document.getElementById(chartId);
+  const wl=document.getElementById(labelsId);
+  if (wc) wc.innerHTML = weekly.map(v=>`<div class="week-bar" style="height:${Math.max(4,Math.round((v/mx)*76))}px;" title="${v} קליקים"></div>`).join("");
+  if (wl) wl.innerHTML = days.map(d=>`<div class="week-lbl">${d}</div>`).join("");
+}
+
+function renderClicksBars(elId) {
+  const el=document.getElementById(elId);
+  if (!el) return;
+  if (!links.length) { el.innerHTML=`<p style="padding:1rem 0;color:var(--text-muted);font-size:0.85rem;">אין נתונים עדיין</p>`; return; }
+  const mx = Math.max(...links.map(l=>l.clicks||0),1);
+  el.innerHTML = links.map(l=>`
+    <div class="bar-row">
+      <div class="bar-lbl">${l.emoji||"🔗"} ${esc(l.title)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((l.clicks||0)/mx)*100)}%"></div></div>
+      <div class="bar-num">${l.clicks||0}</div>
+    </div>
+  `).join("");
+}
+
+function renderSourceBars(elId="source-bars") {
+  const el=document.getElementById(elId);
+  if (!el) return;
+  const sources=[
+    {lbl:"ישיר",val:40},{lbl:"אינסטגרם",val:28},
+    {lbl:"ביוגרפיה",val:16},{lbl:"טיקטוק",val:10},{lbl:"אחר",val:6}
+  ];
+  el.innerHTML=sources.map(s=>`
+    <div class="bar-row">
+      <div class="bar-lbl">${s.lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${s.val}%"></div></div>
+      <div class="bar-num">${s.val}%</div>
+    </div>
+  `).join("");
+}
+
+function renderDeviceBars(elId="device-bars") {
+  const el=document.getElementById(elId);
+  if (!el) return;
+  const devs=[{lbl:"📱 מובייל",val:62},{lbl:"💻 דסקטופ",val:30},{lbl:"📟 טאבלט",val:8}];
+  el.innerHTML=devs.map(d=>`
+    <div class="bar-row">
+      <div class="bar-lbl">${d.lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${d.val}%"></div></div>
+      <div class="bar-num">${d.val}%</div>
+    </div>
+  `).join("");
+}
+
+function renderMiniAnalytics() {
+  const el=document.getElementById("mini-analytics");
+  if (!el) return;
+  if (!links.length) { el.innerHTML=`<p style="color:var(--text-muted);font-size:0.85rem;">אין נתונים</p>`; return; }
+  const mx=Math.max(...links.map(l=>l.clicks||0),1);
+  el.innerHTML=links.map(l=>`
+    <div class="bar-row">
+      <div class="bar-lbl">${l.emoji||"🔗"} ${esc(l.title)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((l.clicks||0)/mx)*100)}%"></div></div>
+      <div class="bar-num">${l.clicks||0}</div>
+    </div>
+  `).join("");
+}
+
+/* ── SHARE / COPY / QR ── */
 function copyLink() {
-  const urlEl = document.getElementById("share-url");
+  const urlEl=document.getElementById("share-url");
   if (!urlEl) return;
-  const url = "https://" + urlEl.textContent;
+  const url="https://"+urlEl.textContent;
   navigator.clipboard.writeText(url)
-    .then(() => toast("📋 הקישור הועתק!", "success"))
-    .catch(() => toast("לא ניתן להעתיק", "error"));
+    .then(()=>toast("📋 הקישור הועתק!","success"))
+    .catch(()=>toast("לא ניתן להעתיק","error"));
 }
 window.copyLink = copyLink;
 
 function shareNative() {
-  const urlEl = document.getElementById("share-url");
+  const urlEl=document.getElementById("share-url");
   if (!urlEl) return;
-  const url = "https://" + urlEl.textContent;
-  if (navigator.share) {
-    navigator.share({ title: "MonoLink", url }).catch(() => {});
-  } else {
-    copyLink();
-  }
+  const url="https://"+urlEl.textContent;
+  if (navigator.share) navigator.share({title:"MonoLink",url}).catch(()=>{});
+  else copyLink();
 }
 window.shareNative = shareNative;
 
-window.copyLinkUrl = function(url) {
-  navigator.clipboard.writeText(url)
-    .then(() => toast("📋 URL הועתק", "success"))
-    .catch(() => toast("לא ניתן להעתיק", "error"));
-};
-
-/* ──────────────────────────────────────────────────────────────
-   QR CODE
-────────────────────────────────────────────────────────────── */
 window.showQR = function() {
-  const slug  = slugOf(userData.displayName || user?.uid || "user");
+  const slug  = slugOf(userData.displayName||"user");
   const url   = `https://monolink.app/u/${slug}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&bgcolor=020408&color=00c8ff&margin=10`;
-  const overlay = document.createElement("div");
-  overlay.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;";
-  overlay.innerHTML = `
+  const overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;";
+  overlay.innerHTML=`
     <div style="background:#0a1628;border:1px solid rgba(0,200,255,0.35);border-radius:20px;padding:2rem;text-align:center;max-width:300px;box-shadow:0 0 40px rgba(0,200,255,0.15);">
       <div style="font-family:'Orbitron',monospace;font-size:0.85rem;letter-spacing:0.1em;color:#8aa4c8;margin-bottom:1.25rem;text-transform:uppercase;">QR CODE</div>
       <img src="${qrUrl}" style="width:220px;height:220px;border-radius:12px;border:2px solid rgba(0,200,255,0.2);" alt="QR"/>
       <div style="font-size:0.75rem;color:#3d5475;margin-top:0.75rem;font-family:monospace;">${url}</div>
       <div style="display:flex;gap:0.5rem;margin-top:1.25rem;justify-content:center;">
         <a href="${qrUrl}" download="monolink-qr.png" class="btn btn-primary btn-sm">⬇️ הורד</a>
-        <button class="btn btn-ghost btn-sm" onclick="this.closest('[style*=fixed]').remove()">✕ סגור</button>
+        <button class="btn btn-ghost btn-sm" onclick="this.closest('div[style*=fixed]').remove()">✕ סגור</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
 };
 
-/* ──────────────────────────────────────────────────────────────
-   TABS (dashboard)
-────────────────────────────────────────────────────────────── */
-function switchTab(name, btn) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+/* ── TABS ── */
+function switchTab(name,btn) {
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   if (btn) btn.classList.add("active");
-  document.getElementById("tab-links").style.display     = name === "links"     ? "block" : "none";
-  document.getElementById("tab-analytics").style.display = name === "analytics" ? "block" : "none";
-  if (name === "analytics") renderAnalytics();
+  document.getElementById("tab-links").style.display     = name==="links"     ? "block" : "none";
+  document.getElementById("tab-analytics").style.display = name==="analytics" ? "block" : "none";
+  if (name==="analytics") renderAnalytics();
 }
 window.switchTab = switchTab;
 
-/* ──────────────────────────────────────────────────────────────
-   ONBOARDING
-────────────────────────────────────────────────────────────── */
-function maybeShowOnboarding() {
-  if (links.length === 0 && !sessionStorage.getItem("ml_onboard")) {
-    sessionStorage.setItem("ml_onboard", "1");
-    setTimeout(() => toast("💡 לחץ '+ הוסף לינק' כדי להתחיל", "success"), 900);
-  }
-}
-
-/* ──────────────────────────────────────────────────────────────
-   TOAST
-────────────────────────────────────────────────────────────── */
-function toast(msg, type = "ok") {
-  const el = document.createElement("div");
-  el.className = `toast ${type === "error" ? "error" : type === "warn" ? "warn" : type === "success" ? "success" : ""}`;
-  el.textContent = msg;
-  const tray = document.getElementById("toast-tray");
+/* ── TOAST ── */
+function toast(msg, type="ok") {
+  const el=document.createElement("div");
+  el.className=`toast ${type==="error"?"error":type==="warn"?"warn":type==="success"?"success":""}`;
+  el.textContent=msg;
+  const tray=document.getElementById("toast-tray");
   if (tray) tray.appendChild(el);
-  setTimeout(() => {
-    el.style.transition = "all 0.3s";
-    el.style.opacity    = "0";
-    el.style.transform  = "scale(0.9)";
-    setTimeout(() => el.remove(), 300);
-  }, 3200);
+  setTimeout(()=>{
+    el.style.transition="all 0.3s";
+    el.style.opacity="0";
+    el.style.transform="scale(0.9)";
+    setTimeout(()=>el.remove(),300);
+  },3200);
 }
 window.toast = toast;
-window.navGo = navGo;
-window.navBack = navBack;
 
-/* ──────────────────────────────────────────────────────────────
-   STAT COUNT-UP ANIMATION
-────────────────────────────────────────────────────────────── */
-function animateCountUp(elId, target, duration = 800) {
-  const el = document.getElementById(elId);
+/* ── LOGIN TRANSITION ── */
+function showLoginTransition(msg) {
+  const overlay=document.getElementById("login-transition");
+  const msgEl  =document.getElementById("lt-msg");
+  const ptcls  =document.getElementById("lt-particles");
+  if (!overlay) return;
+  ptcls.innerHTML="";
+  for (let i=0;i<18;i++) {
+    const p=document.createElement("div");
+    p.className="lt-particle";
+    p.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*3}s;--delay:${Math.random()*2}s;--tx:${(Math.random()-0.5)*80}px;--ty:${-(20+Math.random()*80)}px;background:${["var(--cyan)","var(--violet)","var(--pink)"][i%3]};opacity:${0.3+Math.random()*0.5};width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;`;
+    ptcls.appendChild(p);
+  }
+  if (msgEl) msgEl.textContent=msg||"טוען...";
+  overlay.classList.remove("exit");
+  overlay.classList.add("active");
+  setTimeout(()=>{
+    overlay.classList.add("exit");
+    setTimeout(()=>overlay.classList.remove("active","exit"),650);
+  },1400);
+}
+
+/* ── COUNT-UP ── */
+function animateCountUp(elId,target,duration=800) {
+  const el=document.getElementById(elId);
   if (!el) return;
-  const start = Date.now();
-  const tick  = () => {
-    const p = Math.min(1, (Date.now() - start) / duration);
-    el.textContent = Math.floor(p * target);
-    if (p < 1) requestAnimationFrame(tick);
-    else el.textContent = target;
+  const start=Date.now();
+  const tick=()=>{
+    const p=Math.min(1,(Date.now()-start)/duration);
+    el.textContent=Math.floor(p*target);
+    if (p<1) requestAnimationFrame(tick);
+    else el.textContent=target;
   };
   requestAnimationFrame(tick);
 }
 
-/* ──────────────────────────────────────────────────────────────
-   UTILITIES
-────────────────────────────────────────────────────────────── */
-function uid() { return Math.random().toString(36).slice(2, 11); }
-function esc(s) {
-  return String(s || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-function slugOf(name) {
-  const s = String(name).toLowerCase().trim().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-  return s || "user";
-}
-function setEl(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
+/* ── ERROR HELPERS ── */
+function showErr(el,msg)     { el.textContent=msg; el.classList.add("show"); }
 
-/* ──────────────────────────────────────────────────────────────
-   KEYBOARD SHORTCUTS
-────────────────────────────────────────────────────────────── */
+/* ── KEYBOARD SHORTCUTS ── */
 window.addEventListener("keydown", e => {
-  if (!user) return;
-  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); openModal(); }
-  if (e.key === "1") navGo("dashboard", document.getElementById("ntab-dashboard"));
-  if (e.key === "2") navGo("analytics", document.getElementById("ntab-analytics"));
-  if (e.key === "3") navGo("public",    document.getElementById("ntab-public"));
-  if (e.key === "Escape") closeModal();
+  if (!currentUser) return;
+  if (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  if ((e.metaKey||e.ctrlKey)&&e.key==="k") { e.preventDefault(); openModal(); }
+  if (e.key==="1") navGo("dashboard",document.getElementById("ntab-dashboard"));
+  if (e.key==="2") navGo("analytics",document.getElementById("ntab-analytics"));
+  if (e.key==="3") navGo("public",   document.getElementById("ntab-public"));
+  if (e.key==="Escape") closeModal();
 });
+
+/* ══════════════════════════════════════════════════════════════
+   INIT — check existing session on load
+══════════════════════════════════════════════════════════════ */
+(function init() {
+  const session = getSession();
+  if (session) {
+    const data = getUserData(session.uid);
+    if (data) {
+      currentUser = session;
+      userData    = data;
+      links       = data.links || [];
+      activeTheme = data.theme || 0;
+      applyTheme(activeTheme);
+      renderNavAuth();
+      navGo("dashboard", document.getElementById("ntab-dashboard"));
+      renderAll();
+    } else {
+      clearSession();
+    }
+  }
+})();
 </script>
-
-<!-- ══════════════════════════════════════════════════════════════
-     EMAILJS TEMPLATE — קוד לשימוש ב-EmailJS
-     ── הדבק תוכן זה בתבנית ב-emailjs.com ──
-
-SUBJECT: קוד האימות שלך ל-MonoLink — {{otp_code}}
-
-BODY (HTML):
-<!DOCTYPE html>
-<html dir="rtl" lang="he">
-<head>
-  <meta charset="UTF-8"/>
-  <style>
-    body { margin:0; padding:0; background:#020408; font-family:'Segoe UI',Arial,sans-serif; color:#e2eeff; }
-    .wrap { max-width:480px; margin:40px auto; background:#0a1628; border:1px solid rgba(0,200,255,0.2); border-radius:18px; overflow:hidden; }
-    .header { background:linear-gradient(135deg,#00c8ff,#7833ff,#ff2d8a); padding:2px 0 0; }
-    .header-inner { background:#0a1628; padding:2rem; text-align:center; }
-    .logo { font-size:1.6rem; font-weight:900; letter-spacing:0.12em; background:linear-gradient(135deg,#00c8ff,#7833ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .body { padding:2rem; text-align:center; }
-    .greeting { font-size:1rem; color:#8aa4c8; margin-bottom:1.5rem; }
-    .otp-label { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.12em; color:#3d5475; margin-bottom:0.75rem; }
-    .otp-block { display:inline-block; background:#0f1e36; border:2px solid rgba(0,200,255,0.35); border-radius:14px; padding:1.25rem 2.5rem; }
-    .otp-digits { font-size:2.8rem; font-weight:900; letter-spacing:0.3em; color:#00c8ff; font-family:monospace; }
-    .expiry { font-size:0.78rem; color:#3d5475; margin-top:1.5rem; }
-    .footer { padding:1.25rem 2rem; border-top:1px solid rgba(0,200,255,0.1); text-align:center; font-size:0.75rem; color:#3d5475; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="header"><div class="header-inner"><div class="logo">MONOLINK</div></div></div>
-    <div class="body">
-      <p class="greeting">שלום {{to_name}}, ברוך הבא ל-MonoLink! 🚀</p>
-      <div class="otp-label">קוד האימות שלך</div>
-      <div class="otp-block"><div class="otp-digits">{{otp_code}}</div></div>
-      <p class="expiry">הקוד תקף ל-10 דקות. אל תשתף אותו עם אף אחד.</p>
-    </div>
-    <div class="footer">אם לא ביקשת הרשמה ל-MonoLink, אפשר להתעלם מאימייל זה.</div>
-  </div>
-</body>
-</html>
-
-   ── סוף קוד תבנית EmailJS ──
-══════════════════════════════════════════════════════════════ -->
 </body>
 </html>
