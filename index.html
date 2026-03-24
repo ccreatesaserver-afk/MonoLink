@@ -907,7 +907,7 @@ img { display:block; }
               </div>
             </div>
             <button class="btn btn-primary btn-wide btn-glow mt-2" id="btn-register" onclick="doRegisterStep1()">
-              <span>המשך לאימות ✉️</span>
+              <span>צור חשבון 🚀</span>
             </button>
             <div class="divider"><span class="divider-text">או</span></div>
             <button class="btn-google" onclick="doGoogleLogin()">
@@ -1512,11 +1512,11 @@ window.backToStep1 = function() {
 /* ──────────────────────────────────────────────────────────────
    LOGIN TRANSITION ANIMATION
 ────────────────────────────────────────────────────────────── */
-function showLoginTransition(msg, onDone) {
+function showLoginTransition(msg) {
   const overlay = document.getElementById("login-transition");
   const msgEl   = document.getElementById("lt-msg");
   const ptcls   = document.getElementById("lt-particles");
-  if (!overlay) { onDone && onDone(); return; }
+  if (!overlay) return;
 
   // Generate floating particles
   ptcls.innerHTML = "";
@@ -1524,16 +1524,12 @@ function showLoginTransition(msg, onDone) {
     const p = document.createElement("div");
     p.className = "lt-particle";
     p.style.cssText = `
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      --dur:${2 + Math.random()*3}s;
-      --delay:${Math.random()*2}s;
-      --tx:${(Math.random()-0.5)*80}px;
-      --ty:${-(20 + Math.random()*80)}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --dur:${2+Math.random()*3}s;--delay:${Math.random()*2}s;
+      --tx:${(Math.random()-0.5)*80}px;--ty:${-(20+Math.random()*80)}px;
       background:${["var(--cyan)","var(--violet)","var(--pink)"][i%3]};
-      opacity:${0.3 + Math.random()*0.5};
-      width:${3+Math.random()*5}px;
-      height:${3+Math.random()*5}px;
+      opacity:${0.3+Math.random()*0.5};
+      width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;
     `;
     ptcls.appendChild(p);
   }
@@ -1542,13 +1538,10 @@ function showLoginTransition(msg, onDone) {
   overlay.classList.remove("exit");
   overlay.classList.add("active");
 
-  // After showing for a moment, run the exit animation then call onDone
+  // Auto-hide after 1.4s
   setTimeout(() => {
     overlay.classList.add("exit");
-    setTimeout(() => {
-      overlay.classList.remove("active","exit");
-      onDone && onDone();
-    }, 650);
+    setTimeout(() => overlay.classList.remove("active","exit"), 650);
   }, 1400);
 }
 
@@ -1558,13 +1551,20 @@ function showLoginTransition(msg, onDone) {
 onAuthStateChanged(auth, async u => {
   if (u) {
     user = u;
-    await ensureDoc(u);
-    listenDoc(u.uid);
+    // Show transition overlay immediately (non-blocking)
+    showLoginTransition("ברוך הבא, " + (u.displayName || "משתמש") + "! 🚀");
+    // Navigate to dashboard right away — don't wait for Firestore
     renderNavAuth();
-    showLoginTransition("ברוך הבא, " + (u.displayName || "משתמש") + "! 🚀", () => {
-      navGo("dashboard", document.getElementById("ntab-dashboard"));
-      setTimeout(() => toast("👋 שלום, " + (u.displayName || "משתמש") + "!", "success"), 200);
-    });
+    navGo("dashboard", document.getElementById("ntab-dashboard"));
+    // Then load data in background
+    try {
+      await ensureDoc(u);
+      listenDoc(u.uid);
+    } catch(e) {
+      console.error("Firestore init error:", e);
+      toast("⚠️ בעיה בטעינת הנתונים: " + e.message, "warn");
+    }
+    setTimeout(() => toast("👋 שלום, " + (u.displayName || "משתמש") + "!", "success"), 1600);
   } else {
     user = null;
     if (unsub) { unsub(); unsub = null; }
@@ -1763,7 +1763,7 @@ async function doEmailLogin() {
 window.doEmailLogin = doEmailLogin;
 
 /* ──────────────────────────────────────────────────────────────
-   AUTH — REGISTER STEP 1: validate & send OTP
+   AUTH — REGISTER: ישיר ללא OTP (Firebase מאובטח)
 ────────────────────────────────────────────────────────────── */
 async function doRegisterStep1() {
   const name  = document.getElementById("reg-name").value.trim();
@@ -1781,31 +1781,16 @@ async function doRegisterStep1() {
   if (pw.length < 6) { showErr(errEl, "הסיסמה חייבת להכיל לפחות 6 תווים"); return; }
   if (pw !== pw2)    { showErr(errEl, "הסיסמאות לא תואמות"); return; }
 
-  setLoading("btn-register", true, "<span>המשך לאימות ✉️</span>");
+  setLoading("btn-register", true, "<span>יוצר חשבון...</span>");
 
   try {
-    // Generate OTP
-    otpCode   = generateOTP();
-    otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-    // Send via EmailJS
-    await sendOTPEmail(email, name, otpCode);
-
-    // Save pending data
-    pendingRegData = { name, email, pw };
-
-    // Show OTP step
-    document.getElementById("reg-step1").style.display = "none";
-    document.getElementById("reg-step2").style.display = "block";
-    const dispEl = document.getElementById("otp-email-display");
-    if (dispEl) dispEl.innerHTML = `הכנס את הקוד בן 6 הספרות שנשלח אל <strong style="color:var(--cyan)">${esc(email)}</strong>`;
-    clearOTPInputs();
-    setTimeout(() => document.getElementById("otp-0").focus(), 100);
-    showSuccessMsg(sucEl, "✉️ קוד אימות נשלח לאימייל שלך!");
-
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await updateProfile(cred.user, { displayName: name });
+    await ensureDoc({ ...cred.user, displayName: name });
+    toast("🎉 ברוך הבא ל-MonoLink!", "success");
+    // onAuthStateChanged handles navigation automatically
   } catch(e) {
-    showErr(errEl, "❌ שגיאה בשליחת קוד אימות: " + (e.text || e.message || "שגיאה לא ידועה"));
-  } finally {
+    showErr(errEl, authErrMsg(e.code));
     setLoading("btn-register", false);
   }
 }
