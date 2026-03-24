@@ -631,6 +631,135 @@ img { display:block; }
    UTILITY CLASSES
 ═══════════════════════════════════════════════════════════════ */
 .mt-1 { margin-top:0.75rem; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGIN TRANSITION OVERLAY
+═══════════════════════════════════════════════════════════════ */
+#login-transition {
+  position:fixed; inset:0; z-index:9000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--bg);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.3s var(--ease);
+}
+#login-transition.active {
+  opacity:1;
+  pointer-events:all;
+}
+#login-transition.exit {
+  animation:transitionExit 0.6s var(--ease) forwards;
+}
+@keyframes transitionExit {
+  0%   { opacity:1; clip-path:circle(100% at 50% 50%); }
+  100% { opacity:0; clip-path:circle(0% at 50% 50%); }
+}
+.lt-logo {
+  font-family:var(--font-display); font-size:2.4rem; font-weight:900;
+  background:var(--grad-main); -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:0.12em; margin-bottom:2rem;
+  animation:ltLogoPop 0.5s var(--spring) 0.1s both;
+}
+@keyframes ltLogoPop {
+  from { transform:scale(0.6); opacity:0; }
+  to   { transform:scale(1);   opacity:1; }
+}
+.lt-ring {
+  width:80px; height:80px; position:relative; margin-bottom:1.5rem;
+  animation:ltRingIn 0.5s var(--spring) 0.2s both;
+}
+@keyframes ltRingIn {
+  from { transform:scale(0); opacity:0; }
+  to   { transform:scale(1); opacity:1; }
+}
+.lt-ring::before {
+  content:''; position:absolute; inset:0; border-radius:50%;
+  border:3px solid transparent;
+  border-top-color:var(--cyan);
+  border-right-color:var(--violet);
+  animation:ltSpin 0.9s linear infinite;
+}
+.lt-ring::after {
+  content:''; position:absolute; inset:8px; border-radius:50%;
+  border:2px solid transparent;
+  border-bottom-color:var(--pink);
+  animation:ltSpin 0.6s linear infinite reverse;
+}
+@keyframes ltSpin { to { transform:rotate(360deg); } }
+.lt-msg {
+  font-size:0.85rem; color:var(--text-dim); letter-spacing:0.08em;
+  text-transform:uppercase;
+  animation:ltMsgIn 0.5s ease 0.35s both;
+}
+@keyframes ltMsgIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.lt-particles {
+  position:absolute; inset:0; pointer-events:none; overflow:hidden;
+}
+.lt-particle {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:var(--cyan); animation:ltFloat var(--dur,3s) ease-in-out var(--delay,0s) infinite;
+}
+@keyframes ltFloat {
+  0%,100% { transform:translate(0,0) scale(1); opacity:0.6; }
+  50%     { transform:translate(var(--tx,20px), var(--ty,-40px)) scale(1.5); opacity:0.2; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TERMS / PRIVACY PAGES
+═══════════════════════════════════════════════════════════════ */
+#page-terms, #page-privacy { padding:2rem 1rem; }
+.legal-wrap { max-width:760px; margin:0 auto; }
+.legal-back { margin-bottom:2rem; }
+.legal-header {
+  text-align:center; margin-bottom:3rem; padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+}
+.legal-icon { font-size:3rem; margin-bottom:1rem; }
+.legal-title {
+  font-family:var(--font-display); font-size:2rem; font-weight:900;
+  background:var(--grad-main); -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:0.06em; margin-bottom:0.5rem;
+}
+.legal-updated { font-size:0.8rem; color:var(--text-muted); }
+.legal-section { margin-bottom:2.5rem; }
+.legal-section-title {
+  font-family:var(--font-display); font-size:0.85rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.12em;
+  color:var(--cyan); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;
+}
+.legal-section-title::before {
+  content:''; display:inline-block; width:8px; height:8px;
+  border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan);
+}
+.legal-p {
+  color:var(--text-dim); font-size:0.9rem; line-height:1.8; margin-bottom:0.75rem;
+}
+.legal-list {
+  list-style:none; padding:0; margin:0.75rem 0;
+}
+.legal-list li {
+  padding:0.5rem 0 0.5rem 1.5rem; font-size:0.88rem; color:var(--text-dim);
+  line-height:1.6; position:relative; border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.legal-list li::before {
+  content:'→'; position:absolute; left:0; color:var(--cyan); font-size:0.8rem;
+}
+.legal-highlight {
+  background:rgba(0,200,255,0.06); border:1px solid rgba(0,200,255,0.2);
+  border-radius:var(--radius-sm); padding:1rem 1.25rem; margin:1rem 0;
+}
+.legal-highlight p { margin:0; color:var(--text); font-size:0.88rem; line-height:1.6; }
+.legal-footer {
+  text-align:center; padding-top:2rem; border-top:1px solid var(--border);
+  color:var(--text-muted); font-size:0.8rem; line-height:1.7;
+}
+.legal-contact { color:var(--cyan); cursor:pointer; }
+.legal-contact:hover { text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -730,7 +859,7 @@ img { display:block; }
             </svg>
             המשך עם Google
           </button>
-          <p class="terms-text">בכניסה אתה מסכים ל<span style="color:var(--cyan)">תנאי השימוש</span> ו<span style="color:var(--cyan)">מדיניות הפרטיות</span></p>
+          <p class="terms-text">בכניסה אתה מסכים ל<span style="color:var(--cyan);cursor:pointer;" onclick="navGo('terms',null)">תנאי השימוש</span> ו<span style="color:var(--cyan);cursor:pointer;" onclick="navGo('privacy',null)">מדיניות הפרטיות</span></p>
         </div>
 
         <!-- ── REGISTER FORM ── -->
@@ -1008,6 +1137,174 @@ img { display:block; }
   </section>
 </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       PAGE: TERMS OF SERVICE
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="page" id="page-terms">
+    <div class="legal-wrap">
+      <div class="legal-back">
+        <button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button>
+      </div>
+      <div class="legal-header">
+        <div class="legal-icon">📋</div>
+        <div class="legal-title">תנאי שימוש</div>
+        <div class="legal-updated">עודכן לאחרונה: מרץ 2025</div>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">קבלת התנאים</div>
+        <p class="legal-p">ברוך הבא ל-MonoLink. על ידי גישה לשירות או שימוש בו, אתה מסכים להיות מחויב לתנאי שימוש אלה. אם אינך מסכים לתנאים אלה, אנא אל תשתמש בשירות.</p>
+        <p class="legal-p">MonoLink שומרת לעצמה את הזכות לשנות תנאים אלה בכל עת. שינויים יכנסו לתוקף עם פרסומם. המשך השימוש בשירות לאחר פרסום שינויים מהווה קבלה של התנאים החדשים.</p>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">תיאור השירות</div>
+        <p class="legal-p">MonoLink היא פלטפורמה לניהול זהות דיגיטלית המאפשרת למשתמשים ליצור דף פרופיל אחד המרכז את כל הקישורים שלהם. השירות כולל:</p>
+        <ul class="legal-list">
+          <li>ניהול קישורים עם אפשרות לגרור ולסדר</li>
+          <li>אנליטיקס מפורט של צפיות וקליקים</li>
+          <li>התאמה אישית של ערכות צבעים ועיצוב</li>
+          <li>דף פרופיל ציבורי ייחודי לכל משתמש</li>
+          <li>שיתוף קל דרך QR קוד ולינק ישיר</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">חשבון משתמש</div>
+        <p class="legal-p">כדי להשתמש בתכונות מסוימות של השירות, עליך ליצור חשבון. אתה אחראי לשמור על סודיות פרטי הכניסה שלך.</p>
+        <div class="legal-highlight">
+          <p>⚠️ אתה מתחייב לספק מידע מדויק ועדכני בעת ההרשמה ולעדכן אותו כפי הצורך. אתה אחראי לכל הפעילות המתבצעת תחת חשבונך.</p>
+        </div>
+        <ul class="legal-list">
+          <li>אסור להעביר את חשבונך לאדם אחר</li>
+          <li>עליך להודיע לנו מיד על כל שימוש לא מורשה בחשבונך</li>
+          <li>אנו שומרים את הזכות להשעות חשבונות המפרים תנאים אלה</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">תוכן המשתמש</div>
+        <p class="legal-p">אתה שומר על הבעלות על התוכן שאתה מפרסם בשירות. על ידי פרסום תוכן, אתה מעניק ל-MonoLink רישיון לא-בלעדי לשימוש בתוכן לצורך מתן השירות.</p>
+        <p class="legal-p">אסור לפרסם תוכן שהוא:</p>
+        <ul class="legal-list">
+          <li>לא חוקי, פוגעני, מטעה או מזיק</li>
+          <li>מפר זכויות יוצרים, סימן מסחרי או זכויות קניין רוחני אחרות</li>
+          <li>ספאם, פישינג, מאלוור, או כל תוכן זדוני אחר</li>
+          <li>תוכן שמטרתו לפגוע, להטריד, או לאיים על אנשים אחרים</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">הגבלת אחריות</div>
+        <p class="legal-p">השירות מסופק "כפי שהוא" ללא אחריות מכל סוג שהוא. MonoLink אינה אחראית לנזקים ישירים, עקיפים, מקריים, מיוחדים או תוצאתיים הנובעים מהשימוש בשירות.</p>
+        <div class="legal-highlight">
+          <p>MonoLink אינה מבטיחה שהשירות יהיה זמין ללא הפרעה, ללא שגיאות, או שהשגיאות יתוקנו.</p>
+        </div>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">סיום החשבון</div>
+        <p class="legal-p">אתה יכול לסיים את חשבונך בכל עת על ידי פנייה אלינו. אנו שומרים את הזכות לסיים או להשעות את גישתך לשירות בגין הפרת תנאים אלה.</p>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">דין חל</div>
+        <p class="legal-p">תנאים אלה כפופים לחוקי מדינת ישראל. כל מחלוקת תידון בבתי המשפט המוסמכים בישראל.</p>
+      </div>
+
+      <div class="legal-footer">
+        <p>שאלות על תנאי השימוש? <span class="legal-contact" onclick="toast('📧 support@monolink.app','success')">צור קשר</span></p>
+        <p style="margin-top:0.5rem;">© 2025 MonoLink — כל הזכויות שמורות</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PAGE: PRIVACY POLICY
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="page" id="page-privacy">
+    <div class="legal-wrap">
+      <div class="legal-back">
+        <button class="btn btn-ghost btn-sm" onclick="navBack()">← חזור</button>
+      </div>
+      <div class="legal-header">
+        <div class="legal-icon">🔒</div>
+        <div class="legal-title">מדיניות פרטיות</div>
+        <div class="legal-updated">עודכן לאחרונה: מרץ 2025</div>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">מידע שאנו אוספים</div>
+        <p class="legal-p">אנו אוספים מידע כדי לספק שירות טוב יותר לכל המשתמשים שלנו. המידע שאנו אוספים כולל:</p>
+        <ul class="legal-list">
+          <li><strong style="color:var(--text)">מידע שאתה מספק:</strong> שם, כתובת אימייל, סיסמה (מוצפנת), ביו, וקישורים שאתה מוסיף</li>
+          <li><strong style="color:var(--text)">מידע שנאסף אוטומטית:</strong> נתוני שימוש, כתובת IP, סוג דפדפן, ומכשיר</li>
+          <li><strong style="color:var(--text)">מידע מגורמים שלישיים:</strong> אם אתה נכנס עם Google, אנו מקבלים מידע פרופיל בסיסי</li>
+          <li><strong style="color:var(--text)">נתוני אנליטיקס:</strong> צפיות, קליקים על קישורים, ומקורות תנועה</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">כיצד אנו משתמשים במידע</div>
+        <p class="legal-p">אנו משתמשים במידע שנאסף למטרות הבאות:</p>
+        <ul class="legal-list">
+          <li>לספק, לתחזק ולשפר את השירות שלנו</li>
+          <li>ליצור ולנהל את חשבון המשתמש שלך</li>
+          <li>לאמת את זהותך ולאבטח את חשבונך</li>
+          <li>להציג לך נתוני אנליטיקס על דף הפרופיל שלך</li>
+          <li>לשלוח הודעות שירות חשובות (אימות, איפוס סיסמה)</li>
+          <li>לניתוח שימוש ולשיפור חוויית המשתמש</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">שמירת מידע ואבטחה</div>
+        <div class="legal-highlight">
+          <p>🛡️ אנו משתמשים ב-Firebase של Google לאחסון נתונים מאובטח. הסיסמאות מוצפנות ולעולם אינן נשמרות בטקסט גלוי. הנתונים מאוחסנים בשרתים מוגנים בהצפנה SSL.</p>
+        </div>
+        <p class="legal-p">אנו שומרים את המידע שלך כל עוד חשבונך פעיל. אתה יכול לבקש מחיקת המידע שלך בכל עת על ידי פנייה אלינו.</p>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">שיתוף מידע</div>
+        <p class="legal-p">אנו לא מוכרים, סוחרים, או מעבירים את המידע האישי שלך לצדדים שלישיים, למעט במקרים הבאים:</p>
+        <ul class="legal-list">
+          <li><strong style="color:var(--text)">ספקי שירות:</strong> Firebase (Google) לאחסון, EmailJS לשליחת אימיילים</li>
+          <li><strong style="color:var(--text)">דרישות חוקיות:</strong> אם נדרש על פי חוק או צו שיפוטי</li>
+          <li><strong style="color:var(--text)">הגנה על זכויות:</strong> להגן על הזכויות, הרכוש, או הביטחון של MonoLink</li>
+        </ul>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">עוגיות (Cookies)</div>
+        <p class="legal-p">אנו משתמשים בעוגיות ובטכנולוגיות דומות לניהול הפגישה (Session) שלך ולשמירת ההעדפות שלך. אינך יכול לבטל עוגיות חיוניות מכיוון שהן נדרשות לתפקוד השירות.</p>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">הזכויות שלך</div>
+        <p class="legal-p">יש לך את הזכויות הבאות ביחס למידע האישי שלך:</p>
+        <ul class="legal-list">
+          <li><strong style="color:var(--text)">גישה:</strong> לבקש עותק של המידע שלנו עליך</li>
+          <li><strong style="color:var(--text)">תיקון:</strong> לבקש תיקון מידע לא מדויק</li>
+          <li><strong style="color:var(--text)">מחיקה:</strong> לבקש מחיקת המידע שלך ("הזכות להישכח")</li>
+          <li><strong style="color:var(--text)">ניידות:</strong> לקבל את הנתונים שלך בפורמט מובנה</li>
+          <li><strong style="color:var(--text)">התנגדות:</strong> להתנגד לעיבוד מסוים של המידע שלך</li>
+        </ul>
+        <p class="legal-p">לממש זכויות אלה, פנה אלינו דרך אימייל.</p>
+      </div>
+
+      <div class="legal-section">
+        <div class="legal-section-title">שינויים במדיניות</div>
+        <p class="legal-p">אנו עשויים לעדכן מדיניות פרטיות זו מעת לעת. נודיע לך על שינויים משמעותיים על ידי פרסום הודעה בולטת בשירות שלנו.</p>
+      </div>
+
+      <div class="legal-footer">
+        <p>שאלות על פרטיות? <span class="legal-contact" onclick="toast('📧 privacy@monolink.app','success')">privacy@monolink.app</span></p>
+        <p style="margin-top:0.5rem;">© 2025 MonoLink — כל הזכויות שמורות</p>
+      </div>
+    </div>
+  </section>
+
 <!-- ─── Link Modal ─── -->
 <div class="overlay" id="link-overlay">
   <div class="modal">
@@ -1040,6 +1337,14 @@ img { display:block; }
 
 <!-- ─── Toast Tray ─── -->
 <div id="toast-tray"></div>
+
+<!-- ─── Login Transition Overlay ─── -->
+<div id="login-transition">
+  <div class="lt-particles" id="lt-particles"></div>
+  <div class="lt-ring"></div>
+  <div class="lt-logo">MONOLINK</div>
+  <div class="lt-msg" id="lt-msg">מאמת פרטים...</div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════════
      JAVASCRIPT
@@ -1205,6 +1510,49 @@ window.backToStep1 = function() {
 };
 
 /* ──────────────────────────────────────────────────────────────
+   LOGIN TRANSITION ANIMATION
+────────────────────────────────────────────────────────────── */
+function showLoginTransition(msg, onDone) {
+  const overlay = document.getElementById("login-transition");
+  const msgEl   = document.getElementById("lt-msg");
+  const ptcls   = document.getElementById("lt-particles");
+  if (!overlay) { onDone && onDone(); return; }
+
+  // Generate floating particles
+  ptcls.innerHTML = "";
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement("div");
+    p.className = "lt-particle";
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${2 + Math.random()*3}s;
+      --delay:${Math.random()*2}s;
+      --tx:${(Math.random()-0.5)*80}px;
+      --ty:${-(20 + Math.random()*80)}px;
+      background:${["var(--cyan)","var(--violet)","var(--pink)"][i%3]};
+      opacity:${0.3 + Math.random()*0.5};
+      width:${3+Math.random()*5}px;
+      height:${3+Math.random()*5}px;
+    `;
+    ptcls.appendChild(p);
+  }
+
+  if (msgEl) msgEl.textContent = msg || "מאמת פרטים...";
+  overlay.classList.remove("exit");
+  overlay.classList.add("active");
+
+  // After showing for a moment, run the exit animation then call onDone
+  setTimeout(() => {
+    overlay.classList.add("exit");
+    setTimeout(() => {
+      overlay.classList.remove("active","exit");
+      onDone && onDone();
+    }, 650);
+  }, 1400);
+}
+
+/* ──────────────────────────────────────────────────────────────
    AUTH STATE LISTENER
 ────────────────────────────────────────────────────────────── */
 onAuthStateChanged(auth, async u => {
@@ -1213,8 +1561,10 @@ onAuthStateChanged(auth, async u => {
     await ensureDoc(u);
     listenDoc(u.uid);
     renderNavAuth();
-    navGo("dashboard", document.getElementById("ntab-dashboard"));
-    setTimeout(() => toast("👋 שלום, " + (u.displayName || "משתמש") + "!", "success"), 400);
+    showLoginTransition("ברוך הבא, " + (u.displayName || "משתמש") + "! 🚀", () => {
+      navGo("dashboard", document.getElementById("ntab-dashboard"));
+      setTimeout(() => toast("👋 שלום, " + (u.displayName || "משתמש") + "!", "success"), 200);
+    });
   } else {
     user = null;
     if (unsub) { unsub(); unsub = null; }
@@ -1306,15 +1656,17 @@ function listenDoc(uid_param) {
 /* ──────────────────────────────────────────────────────────────
    NAVIGATION
 ────────────────────────────────────────────────────────────── */
+let prevPage = "auth";
 function navGo(name, btn) {
+  prevPage = currentPage;
   currentPage = name;
 
   // Update nav tab highlights
   document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
   if (btn) btn.classList.add("active");
 
-  // Toggle pages
-  ["auth","dashboard","analytics","public"].forEach(p => {
+  // Toggle pages (including legal pages)
+  ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
     const el = document.getElementById("page-" + p);
     if (el) el.classList.toggle("active", p === name);
   });
@@ -1323,6 +1675,11 @@ function navGo(name, btn) {
   if (name === "analytics") renderFullAnalyticsPage();
 }
 window.navGo = navGo;
+
+function navBack() {
+  navGo(prevPage || (user ? "dashboard" : "auth"), null);
+}
+window.navBack = navBack;
 
 function handleBrandClick() {
   if (user) navGo("dashboard", document.getElementById("ntab-dashboard"));
@@ -1361,7 +1718,7 @@ function switchAuthTab(tab) {
   document.getElementById("reg-success").classList.remove("show");
   // Always go to auth page if not logged in
   if (!user) {
-    ["auth","dashboard","analytics","public"].forEach(p => {
+    ["auth","dashboard","analytics","public","terms","privacy"].forEach(p => {
       const el = document.getElementById("page-" + p);
       if (el) el.classList.toggle("active", p === "auth");
     });
@@ -2207,6 +2564,8 @@ function toast(msg, type = "ok") {
   }, 3200);
 }
 window.toast = toast;
+window.navGo = navGo;
+window.navBack = navBack;
 
 /* ──────────────────────────────────────────────────────────────
    STAT COUNT-UP ANIMATION
