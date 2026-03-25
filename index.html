@@ -10,6 +10,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- SortableJS: תמיכה בגרירה על מובייל -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -31,7 +33,7 @@
             min-height: 100vh;
         }
         h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
-        
+
         /* GLASS */
         .glass {
             background: var(--glass);
@@ -84,11 +86,20 @@
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         @keyframes spin-slow { to { transform: rotate(360deg); } }
         @keyframes badge-pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes skeleton-pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.7; } }
 
         .fade-up { animation: fadeUp 0.5s ease forwards; }
         .link-anim { animation: fadeUp 0.35s ease both; }
         .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
         .badge-anim { animation: badge-pop 2s ease-in-out infinite; }
+
+        /* SKELETON LOADING */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% auto;
+            animation: shimmer 1.5s linear infinite, skeleton-pulse 1.5s ease-in-out infinite;
+            border-radius: 8px;
+        }
 
         /* GRADIENT TEXT */
         .grad-text {
@@ -175,6 +186,7 @@
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 9999; pointer-events: none;
             display: flex; align-items: center; gap: 8px;
+            max-width: 90vw; text-align: center;
         }
         #toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -190,6 +202,7 @@
             max-width: 520px; width: 100%;
             max-height: 90vh; overflow-y: auto;
             animation: fadeUp 0.3s ease;
+            position: relative;
         }
 
         /* STAT CARDS */
@@ -201,8 +214,10 @@
         .nav-item.active { background: rgba(99,102,241,0.15); color: #818cf8; }
 
         /* LINK EDITOR ROW */
-        .link-row { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 16px; padding: 14px; transition: all 0.2s; }
+        .link-row { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 16px; padding: 14px; transition: all 0.2s; user-select: none; }
         .link-row:hover { border-color: rgba(99,102,241,0.3); }
+        .link-row.sortable-ghost { opacity: 0.4; border: 2px dashed rgba(99,102,241,0.5); }
+        .link-row.sortable-drag { opacity: 1; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 
         /* TERMS */
         .terms-section { margin-bottom: 28px; }
@@ -234,24 +249,58 @@
         /* SECTION TABS */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeUp 0.3s ease; }
+
+        /* LOADING OVERLAY */
+        #loadingOverlay {
+            position: fixed; inset: 0; z-index: 9998;
+            background: #050508;
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+            transition: opacity 0.4s ease;
+        }
+        #loadingOverlay.fade-out { opacity: 0; pointer-events: none; }
+
+        /* PUBLIC VIEW SKELETON */
+        .pub-skeleton { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #050508; }
+
+        /* Grip cursor for drag */
+        .grip-handle { cursor: grab; touch-action: none; }
+        .grip-handle:active { cursor: grabbing; }
     </style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════
+     LOADING OVERLAY
+═══════════════════════════════════════════ -->
+<div id="loadingOverlay">
+    <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#a855f7)">
+        <i class="fa-solid fa-id-card text-2xl text-white"></i>
+    </div>
+    <div class="text-center">
+        <p class="font-display font-black text-white text-xl">BioPro <span class="grad-text">Cloud</span></p>
+        <p class="text-xs text-slate-500 mt-1">טוען...</p>
+    </div>
+    <div class="flex gap-1 mt-2">
+        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500" style="animation:badge-pop 1s ease-in-out infinite 0s"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-purple-500" style="animation:badge-pop 1s ease-in-out infinite 0.2s"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-indigo-400" style="animation:badge-pop 1s ease-in-out infinite 0.4s"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
      TOAST NOTIFICATION
 ═══════════════════════════════════════════ -->
-<div id="toast"><i class="fa-solid fa-circle-check text-green-400"></i> <span id="toastMsg"></span></div>
+<div id="toast"></div>
 
 <!-- ═══════════════════════════════════════════
      LOGIN SCREEN
 ═══════════════════════════════════════════ -->
-<div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#050508]">
+<div id="loginScreen" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-[#050508]">
     <!-- BG ORBS -->
     <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-10" style="background:radial-gradient(circle,#6366f1,transparent 70%); filter:blur(60px); pointer-events:none;"></div>
     <div class="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-10" style="background:radial-gradient(circle,#a855f7,transparent 70%); filter:blur(60px); pointer-events:none;"></div>
 
-    <div class="relative glass p-10 rounded-[2.5rem] w-full max-w-sm mx-4 shadow-2xl">
+    <div class="relative glass p-10 rounded-[2.5rem] w-full max-w-sm mx-4 shadow-2xl fade-up">
         <!-- LOGO -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:linear-gradient(135deg,#6366f1,#a855f7)">
@@ -263,7 +312,7 @@
 
         <div class="space-y-3">
             <button onclick="authAction('google')" class="w-full flex items-center justify-center gap-3 p-4 bg-white text-black rounded-2xl font-bold hover:bg-slate-100 transition shadow-lg">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-5 h-5">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-5 h-5" loading="lazy" alt="Google">
                 המשך עם Google
             </button>
 
@@ -273,8 +322,8 @@
                 <div class="flex-1 h-px bg-white/10"></div>
             </div>
 
-            <input type="email" id="email" placeholder="כתובת אימייל" class="inp">
-            <input type="password" id="pass" placeholder="סיסמה (6+ תווים)" class="inp">
+            <input type="email" id="email" placeholder="כתובת אימייל" class="inp" autocomplete="email">
+            <input type="password" id="pass" placeholder="סיסמה (6+ תווים)" class="inp" autocomplete="current-password">
             <button onclick="authAction('email')" class="btn-shimmer w-full p-4 rounded-2xl font-bold text-white font-display" style="letter-spacing:0.02em;">
                 כניסה / הרשמה
             </button>
@@ -338,7 +387,7 @@
                         <label class="text-xs text-slate-400 mb-2 block font-medium">תמונת פרופיל</label>
                         <div class="flex gap-4 items-start">
                             <div class="relative shrink-0">
-                                <img id="profileImgPreview" src="https://ui-avatars.com/api/?name=User&background=random" class="w-20 h-20 rounded-2xl object-cover border border-white/10">
+                                <img id="profileImgPreview" src="https://ui-avatars.com/api/?name=User&background=random" class="w-20 h-20 rounded-2xl object-cover border border-white/10" loading="lazy" alt="תמונת פרופיל">
                                 <button onclick="document.getElementById('imgFileInput').click()" class="absolute -bottom-2 -left-2 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-[#050508] hover:bg-indigo-500 transition">
                                     <i class="fa-solid fa-camera text-[10px]"></i>
                                 </button>
@@ -365,7 +414,7 @@
                         </div>
                         <div>
                             <label class="text-xs text-slate-400 mb-1.5 block">מספר טלפון</label>
-                            <input type="text" id="phoneIn" oninput="autoSave()" placeholder="050-0000000" class="inp">
+                            <input type="tel" id="phoneIn" oninput="autoSave()" placeholder="050-0000000" class="inp">
                         </div>
                     </div>
 
@@ -424,7 +473,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500">גרור לסידור מחדש. משתמשי PRO יכולים להוסיף עד 30 קישורים.</p>
+                    <p class="text-xs text-slate-500">גרור לסידור מחדש (עובד גם במובייל). משתמשי PRO יכולים להוסיף עד 30 קישורים.</p>
                     <div id="linksEditor" class="space-y-3"></div>
                     <div id="linksLimitMsg" class="hidden text-center py-4">
                         <p class="text-xs text-slate-400 mb-2">הגעת למגבלת 5 קישורים בחשבון חינמי</p>
@@ -451,7 +500,7 @@
                         <div class="phone-notch"></div>
                         <div id="previewScreen" class="h-full pt-12 overflow-y-auto no-scrollbar theme-classic">
                             <div class="px-5 flex flex-col items-center pb-10">
-                                <img id="pImg" src="" class="w-24 h-24 rounded-2xl object-cover border-2 border-white/10 shadow-xl mt-4">
+                                <img id="pImg" src="" class="w-24 h-24 rounded-2xl object-cover border-2 border-white/10 shadow-xl mt-4" loading="lazy" alt="תמונת פרופיל">
                                 <h2 id="pName" class="mt-3 text-lg font-display font-black text-center"></h2>
                                 <p id="pTitle" class="text-xs opacity-50 mt-0.5 text-center font-medium"></p>
                                 <p id="pBio" class="text-xs opacity-60 text-center mt-2 px-2 leading-relaxed"></p>
@@ -677,7 +726,7 @@
             </div>
 
             <!-- VERSION -->
-            <p class="text-center text-xs text-slate-600">BioPro Cloud v2.0.0 · <button onclick="openTerms('full')" class="text-slate-500 hover:text-slate-400">תנאים</button> · <button onclick="openPrivacy()" class="text-slate-500 hover:text-slate-400">פרטיות</button></p>
+            <p class="text-center text-xs text-slate-600">BioPro Cloud v2.1.0 · <button onclick="openTerms('full')" class="text-slate-500 hover:text-slate-400">תנאים</button> · <button onclick="openPrivacy()" class="text-slate-500 hover:text-slate-400">פרטיות</button></p>
         </div>
     </div>
 </div>
@@ -692,19 +741,19 @@
         <p class="text-sm text-slate-400 mb-6">סרוק את ה-QR או שתף ישירות</p>
         <div id="qrcode" class="bg-white p-4 rounded-2xl inline-block mx-auto mb-6"></div>
         <div class="grid grid-cols-4 gap-3 mb-4">
-            <button onclick="shareTo('whatsapp')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:#25D366/10;border:1px solid #25D36640;">
+            <button onclick="shareTo('whatsapp')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.4);">
                 <i class="fa-brands fa-whatsapp text-xl" style="color:#25D366;"></i>
                 <span class="text-[9px] text-slate-400">WhatsApp</span>
             </button>
-            <button onclick="shareTo('facebook')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:#1877F210;border:1px solid #1877F240;">
+            <button onclick="shareTo('facebook')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:rgba(24,119,242,0.1);border:1px solid rgba(24,119,242,0.4);">
                 <i class="fa-brands fa-facebook text-xl" style="color:#1877F2;"></i>
                 <span class="text-[9px] text-slate-400">Facebook</span>
             </button>
-            <button onclick="shareTo('linkedin')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:#0A66C210;border:1px solid #0A66C240;">
+            <button onclick="shareTo('linkedin')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:rgba(10,102,194,0.1);border:1px solid rgba(10,102,194,0.4);">
                 <i class="fa-brands fa-linkedin text-xl" style="color:#0A66C2;"></i>
                 <span class="text-[9px] text-slate-400">LinkedIn</span>
             </button>
-            <button onclick="shareTo('twitter')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:#1DA1F210;border:1px solid #1DA1F240;">
+            <button onclick="shareTo('twitter')" class="p-3 rounded-2xl flex flex-col items-center gap-1 hover:scale-105 transition" style="background:rgba(29,161,242,0.1);border:1px solid rgba(29,161,242,0.4);">
                 <i class="fa-brands fa-twitter text-xl" style="color:#1DA1F2;"></i>
                 <span class="text-[9px] text-slate-400">Twitter</span>
             </button>
@@ -727,11 +776,7 @@
             </h3>
             <button onclick="closeTerms()" class="text-slate-500 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
-
-        <div id="termsContent" class="terms-scroll mb-6">
-            <!-- Content injected by JS -->
-        </div>
-
+        <div id="termsContent" class="terms-scroll mb-6"></div>
         <div id="termsActions" class="flex gap-3">
             <button onclick="closeTerms()" class="flex-1 py-3 rounded-xl border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/5 transition">סגור</button>
             <button id="termsAcceptBtn" onclick="acceptTerms()" class="hidden flex-1 btn-shimmer py-3 rounded-xl font-bold text-white text-sm">
@@ -751,22 +796,18 @@
         </div>
         <h3 class="font-display font-black text-2xl text-white mb-2">שדרג ל-PRO</h3>
         <p class="text-slate-400 text-sm mb-6">קבל גישה לכל התכונות המתקדמות</p>
-
         <div class="bg-black/30 border border-white/5 rounded-2xl p-5 mb-6 text-right space-y-3">
             <div class="flex items-center gap-3 text-sm"><i class="fa-solid fa-check text-green-400 w-4 shrink-0"></i><span class="text-slate-300">קישורים ללא הגבלה</span></div>
             <div class="flex items-center gap-3 text-sm"><i class="fa-solid fa-check text-green-400 w-4 shrink-0"></i><span class="text-slate-300">אנליטיקס מפורטת</span></div>
             <div class="flex items-center gap-3 text-sm"><i class="fa-solid fa-check text-green-400 w-4 shrink-0"></i><span class="text-slate-300">עיצובים בלעדיים (Neon, Gold)</span></div>
             <div class="flex items-center gap-3 text-sm"><i class="fa-solid fa-check text-green-400 w-4 shrink-0"></i><span class="text-slate-300">ללא מיתוג BioPro</span></div>
         </div>
-
         <div class="text-3xl font-display font-black text-white mb-1">₪29<span class="text-sm text-slate-500 font-normal">/חודש</span></div>
         <p class="text-xs text-slate-500 mb-6">או ₪208/שנה (חוסך 40%)</p>
-
         <button onclick="activatePro()" class="btn-shimmer w-full py-4 rounded-2xl font-black text-white text-base mb-3">
             <i class="fa-solid fa-crown ml-2"></i> שדרג עכשיו
         </button>
         <button onclick="closeProModal()" class="w-full py-3 text-slate-500 text-sm hover:text-slate-300 transition">אולי מאוחר יותר</button>
-
         <p class="text-[10px] text-slate-600 mt-4">
             בלחיצה על שדרג, אתה מסכים ל<button onclick="openTerms('upgrade')" class="text-indigo-400 underline bg-transparent border-none cursor-pointer">תנאי השימוש</button>. ניתן לבטל בכל עת.
         </p>
@@ -819,6 +860,7 @@
 ═══════════════════════════════════════════ -->
 <script>
     // ─── FIREBASE CONFIG ───
+    // החלף בפרטי ה-Firebase שלך:
     const firebaseConfig = {
         apiKey: "AIzaSyCQ4JuNyv-OLszK57jgjxsQi4qlOuSJkq8",
         authDomain: "biopro-55077.firebaseapp.com",
@@ -831,27 +873,48 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // אפשר Offline Support
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        if (err.code === 'failed-precondition') console.warn('Firestore persistence: multiple tabs open');
+        else if (err.code === 'unimplemented') console.warn('Firestore persistence: browser not supported');
+    });
+
     // ─── STATE ───
     let userData = { name:"", bio:"", phone:"", img:"", title:"", theme:"theme-classic", links:[], plan:"free", animations:true };
     let saveTimeout;
     let currentUser = null;
     let isPro = false;
     const FREE_LINK_LIMIT = 5;
+    let sortableInstance = null;
+
+    // ─── HELPER: XSS-SAFE text setter ───
+    function safeText(el, text) {
+        if (typeof el === 'string') el = document.getElementById(el);
+        if (el) el.textContent = text || '';
+    }
 
     // ─── AUTH STATE ───
     auth.onAuthStateChanged(user => {
+        hideLoading();
         if (user) {
             currentUser = user;
-            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
             fetchUserData(user.uid);
             updateSettingsUI(user);
         } else {
             currentUser = null;
-            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('adminPanel').classList.add('hidden');
         }
     });
+
+    // ─── LOADING ───
+    function hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.style.display = 'none', 400);
+    }
 
     // ─── FETCH USER DATA ───
     async function fetchUserData(uid) {
@@ -872,31 +935,28 @@
             renderEditor();
             renderPreview();
             loadStats();
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error('fetchUserData error:', e); }
     }
 
-    // ─── AUTO SAVE ───
-    function autoSave() {
-        clearTimeout(saveTimeout);
+    // ─── AUTO SAVE (debounced 800ms) ───
+    const autoSave = debounce(async function() {
         const status = document.getElementById('saveStatus');
         status.innerHTML = '<i class="fa-solid fa-rotate fa-spin text-indigo-400"></i> שומר...';
-        saveTimeout = setTimeout(async () => {
-            userData.name = document.getElementById('nameIn').value;
-            userData.bio = document.getElementById('bioIn').value;
-            userData.phone = document.getElementById('phoneIn').value;
-            userData.img = document.getElementById('imgIn').value;
-            userData.title = document.getElementById('titleIn').value;
-            if (currentUser) {
-                try {
-                    await db.collection("users").doc(currentUser.uid).set(userData);
-                    status.innerHTML = '<i class="fa-solid fa-cloud-check text-green-400"></i> נשמר אוטומטית';
-                    renderPreview();
-                } catch(e) {
-                    status.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-400"></i> שגיאה בשמירה';
-                }
+        userData.name = document.getElementById('nameIn').value;
+        userData.bio = document.getElementById('bioIn').value;
+        userData.phone = document.getElementById('phoneIn').value;
+        userData.img = document.getElementById('imgIn').value;
+        userData.title = document.getElementById('titleIn').value;
+        if (currentUser) {
+            try {
+                await db.collection("users").doc(currentUser.uid).set(userData);
+                status.innerHTML = '<i class="fa-solid fa-cloud-check text-green-400"></i> נשמר אוטומטית';
+                renderPreview();
+            } catch(e) {
+                status.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-400"></i> שגיאה בשמירה';
             }
-        }, 800);
-    }
+        }
+    }, 800);
 
     // ─── IMAGE UPLOAD ───
     function handleImageUpload(event) {
@@ -913,7 +973,7 @@
             if (currentUser) {
                 db.collection("users").doc(currentUser.uid).set(userData).then(() => {
                     showToast('✅ תמונה עודכנה בהצלחה!');
-                });
+                }).catch(() => showToast('❌ שגיאה בשמירת התמונה'));
             }
         };
         reader.readAsDataURL(file);
@@ -924,8 +984,7 @@
         document.getElementById('uploadZone').classList.remove('drag-over');
         const file = event.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
-            const fakeEvent = { target: { files: [file] } };
-            handleImageUpload(fakeEvent);
+            handleImageUpload({ target: { files: [file] } });
         }
     }
 
@@ -941,7 +1000,7 @@
     // ─── CHAR COUNT ───
     function updateCharCount() {
         const val = document.getElementById('bioIn').value.length;
-        document.getElementById('charCount').textContent = val + '/150';
+        safeText('charCount', val + '/150');
     }
 
     // ─── THEME ───
@@ -951,7 +1010,6 @@
         const themeClasses = ['theme-classic','theme-ocean','theme-sunset','theme-aurora','theme-minimal','theme-neon','theme-gold'];
         themeClasses.forEach(c => preview.classList.remove(c));
         preview.classList.add(t);
-        // Update active dot
         themeClasses.forEach(c => { const d = document.getElementById('dot-' + c); if(d) d.classList.remove('active'); });
         const activeDot = document.getElementById('dot-' + t);
         if (activeDot) activeDot.classList.add('active');
@@ -965,7 +1023,7 @@
         autoSave();
     }
 
-    // ─── LINKS ───
+    // ─── SOCIAL STYLE ───
     function getSocialStyle(url) {
         const l = (url || '').toLowerCase();
         if (l.includes('instagram')) return { icon: 'fa-brands fa-instagram', color: 'bg-gradient-to-r from-[#833ab4] to-[#fd1d1d]' };
@@ -982,39 +1040,74 @@
         return { icon: 'fa-solid fa-link', color: 'bg-indigo-700' };
     }
 
+    // ─── RENDER EDITOR ───
     function renderEditor() {
         const container = document.getElementById('linksEditor');
         container.innerHTML = '';
         const count = userData.links.length;
         const limit = isPro ? 30 : FREE_LINK_LIMIT;
-        document.getElementById('linksCountBadge').textContent = count + ' / ' + (isPro ? '∞' : FREE_LINK_LIMIT);
+        safeText('linksCountBadge', count + ' / ' + (isPro ? '∞' : FREE_LINK_LIMIT));
         document.getElementById('addLinkBtn').style.display = count >= limit ? 'none' : 'flex';
         document.getElementById('linksLimitMsg').style.display = (!isPro && count >= FREE_LINK_LIMIT) ? 'block' : 'none';
+
         userData.links.forEach((link, i) => {
             const d = document.createElement('div');
             d.className = "link-row";
-            d.setAttribute('draggable', 'true');
+            d.dataset.index = i;
+
+            const titleInput = document.createElement('input');
+            titleInput.className = 'inp text-sm py-2.5 px-3';
+            titleInput.placeholder = 'שם הקישור (למשל: Instagram, אתר שלי...)';
+            titleInput.value = link.t || '';
+            titleInput.addEventListener('input', () => { userData.links[i].t = titleInput.value; autoSave(); renderPreview(); });
+
+            const urlInput = document.createElement('input');
+            urlInput.className = 'inp text-xs py-2 px-3 text-indigo-400';
+            urlInput.placeholder = 'https://...';
+            urlInput.value = link.u || '';
+            urlInput.addEventListener('input', () => { userData.links[i].u = urlInput.value; autoSave(); renderPreview(); });
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'text-red-500/40 hover:text-red-500 transition p-1';
+            removeBtn.innerHTML = '<i class="fa-solid fa-trash text-sm"></i>';
+            removeBtn.addEventListener('click', () => { userData.links.splice(i, 1); renderEditor(); autoSave(); renderPreview(); });
+
             d.innerHTML = `
                 <div class="flex gap-3 items-center">
-                    <div class="text-slate-600 cursor-grab touch-none"><i class="fa-solid fa-grip-vertical"></i></div>
-                    <div class="flex-1 space-y-2">
-                        <input oninput="updateLink(${i},'t',this.value)" value="${link.t || ''}" placeholder="שם הקישור (למשל: Instagram, אתר שלי...)" class="inp text-sm py-2.5 px-3">
-                        <input oninput="updateLink(${i},'u',this.value)" value="${link.u || ''}" placeholder="https://..." class="inp text-xs py-2 px-3 text-indigo-400">
-                    </div>
+                    <div class="grip-handle text-slate-600"><i class="fa-solid fa-grip-vertical"></i></div>
+                    <div class="flex-1 space-y-2"></div>
                     <div class="text-center shrink-0">
                         <div class="text-[10px] text-slate-600 leading-tight">לחיצות</div>
                         <div class="text-sm font-bold text-slate-400">${link.clicks || 0}</div>
                     </div>
-                    <button onclick="removeLink(${i})" class="text-red-500/40 hover:text-red-500 transition p-1"><i class="fa-solid fa-trash text-sm"></i></button>
+                    <div class="remove-btn-slot"></div>
                 </div>
             `;
+            d.querySelector('.flex-1').appendChild(titleInput);
+            d.querySelector('.flex-1').appendChild(urlInput);
+            d.querySelector('.remove-btn-slot').appendChild(removeBtn);
             container.appendChild(d);
         });
+
+        // SortableJS — עובד גם על מובייל
+        if (sortableInstance) sortableInstance.destroy();
+        sortableInstance = Sortable.create(container, {
+            animation: 200,
+            handle: '.grip-handle',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd(evt) {
+                const moved = userData.links.splice(evt.oldIndex, 1)[0];
+                userData.links.splice(evt.newIndex, 0, moved);
+                autoSave();
+                renderPreview();
+                renderEditor();
+            }
+        });
+
         loadLinkStats();
     }
 
-    function updateLink(i, f, v) { userData.links[i][f] = v; autoSave(); renderPreview(); }
-    function removeLink(i) { userData.links.splice(i, 1); renderEditor(); autoSave(); renderPreview(); }
     function addNewLink() {
         const limit = isPro ? 30 : FREE_LINK_LIMIT;
         if (userData.links.length >= limit) {
@@ -1027,9 +1120,9 @@
     // ─── PREVIEW ───
     function renderPreview() {
         const isMinimal = userData.theme === 'theme-minimal';
-        document.getElementById('pName').textContent = userData.name || "השם שלך";
-        document.getElementById('pTitle').textContent = userData.title || "";
-        document.getElementById('pBio').textContent = userData.bio || "";
+        safeText('pName', userData.name || "השם שלך");
+        safeText('pTitle', userData.title || "");
+        safeText('pBio', userData.bio || "");
         const imgEl = document.getElementById('pImg');
         imgEl.src = userData.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'User')}&background=random&size=200`;
         imgEl.onerror = () => imgEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'U')}&background=random&size=200`;
@@ -1042,10 +1135,31 @@
             const a = document.createElement('a');
             a.href = l.u || "#";
             a.target = "_blank";
-            a.className = `link-anim flex items-center justify-between px-4 py-3 rounded-2xl transition-all hover:scale-105 hover:shadow-lg ${isMinimal ? 'bg-slate-100 text-gray-900 border border-slate-200' : style.color + ' text-white'}`;
+            a.rel = "noopener noreferrer";
+            a.className = `link-anim flex items-center justify-between px-4 py-3 rounded-2xl transition-all hover:scale-105 hover:shadow-lg ${isMinimal ? 'bg-slate-100 border border-slate-200' : style.color + ' text-white'}`;
             if (userData.animations) a.style.animationDelay = `${i * 0.08}s`;
-            a.innerHTML = `<div class="flex items-center gap-2.5"><i class="${style.icon} text-sm"></i><span class="font-bold text-sm">${l.t}</span></div><i class="fa-solid fa-chevron-left text-xs opacity-40"></i>`;
-            a.onclick = (e) => { e.preventDefault(); if(currentUser) trackClick(currentUser.uid, i); setTimeout(() => window.open(l.u, '_blank'), 150); };
+
+            const iconEl = document.createElement('i');
+            iconEl.className = style.icon + ' text-sm';
+            const nameEl = document.createElement('span');
+            nameEl.className = 'font-bold text-sm';
+            nameEl.textContent = l.t; // textContent — בטוח מ-XSS
+            const rightIcon = document.createElement('i');
+            rightIcon.className = 'fa-solid fa-chevron-left text-xs opacity-40';
+
+            const leftDiv = document.createElement('div');
+            leftDiv.className = 'flex items-center gap-2.5';
+            leftDiv.appendChild(iconEl);
+            leftDiv.appendChild(nameEl);
+            if (isMinimal) { leftDiv.style.color = '#0f172a'; }
+
+            a.appendChild(leftDiv);
+            a.appendChild(rightIcon);
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) trackClick(currentUser.uid, i);
+                setTimeout(() => window.open(l.u, '_blank', 'noopener'), 150);
+            });
             container.appendChild(a);
         });
     }
@@ -1053,11 +1167,10 @@
     // ─── STATS ───
     function loadStats() {
         const totalClicks = userData.links.reduce((s, l) => s + (l.clicks || 0), 0);
-        document.getElementById('statClicks').textContent = totalClicks;
-        document.getElementById('statLinks').textContent = userData.links.filter(l => l.t).length;
-        document.getElementById('statViews').textContent = userData.views || 0;
-        document.getElementById('statSaves').textContent = userData.saves || 0;
-        // Show/hide pro lock
+        safeText('statClicks', totalClicks);
+        safeText('statLinks', userData.links.filter(l => l.t).length);
+        safeText('statViews', userData.views || 0);
+        safeText('statSaves', userData.saves || 0);
         document.getElementById('statsProLock').style.display = isPro ? 'none' : 'flex';
         loadLinkStats();
     }
@@ -1067,18 +1180,26 @@
         if (!container) return;
         container.innerHTML = '';
         const maxClicks = Math.max(...userData.links.map(l => l.clicks || 0), 1);
-        userData.links.forEach((l, i) => {
+        userData.links.forEach((l) => {
             if (!l.t) return;
             const pct = Math.round(((l.clicks || 0) / maxClicks) * 100);
             const d = document.createElement('div');
             d.className = 'space-y-1';
-            d.innerHTML = `
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-300">${l.t}</span>
-                    <span class="text-slate-400 font-bold">${l.clicks || 0}</span>
-                </div>
-                <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-            `;
+            const row = document.createElement('div');
+            row.className = 'flex justify-between text-sm';
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'text-slate-300';
+            nameSpan.textContent = l.t;
+            const clicksSpan = document.createElement('span');
+            clicksSpan.className = 'text-slate-400 font-bold';
+            clicksSpan.textContent = l.clicks || 0;
+            row.appendChild(nameSpan);
+            row.appendChild(clicksSpan);
+            const bar = document.createElement('div');
+            bar.className = 'prog-bar';
+            bar.innerHTML = `<div class="prog-fill" style="width:${pct}%"></div>`;
+            d.appendChild(row);
+            d.appendChild(bar);
             container.appendChild(d);
         });
     }
@@ -1090,6 +1211,7 @@
             const doc = await transaction.get(userRef);
             if (!doc.exists) return;
             const links = doc.data().links;
+            if (!links[linkIndex]) return;
             links[linkIndex].clicks = (links[linkIndex].clicks || 0) + 1;
             transaction.update(userRef, { links });
         }).catch(console.error);
@@ -1108,7 +1230,7 @@
                 if (p.length < 6) { showToast('⚠️ הסיסמה חייבת להכיל לפחות 6 תווים'); return; }
                 try { await auth.signInWithEmailAndPassword(e, p); }
                 catch (err) {
-                    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
                         await auth.createUserWithEmailAndPassword(e, p);
                     } else throw err;
                 }
@@ -1118,7 +1240,8 @@
                 'auth/invalid-email': 'כתובת האימייל אינה תקינה',
                 'auth/weak-password': 'הסיסמה חלשה מדי',
                 'auth/email-already-in-use': 'האימייל כבר רשום. נסה להתחבר.',
-                'auth/popup-closed-by-user': 'חלון ההתחברות נסגר'
+                'auth/popup-closed-by-user': 'חלון ההתחברות נסגר',
+                'auth/network-request-failed': 'בעיית רשת. בדוק חיבור לאינטרנט.'
             };
             showToast('❌ ' + (msgs[err.code] || err.message));
         }
@@ -1148,34 +1271,54 @@
             linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
             twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`
         };
-        window.open(urls[platform], '_blank');
+        if (urls[platform]) window.open(urls[platform], '_blank', 'noopener');
     }
 
     function copyPublicLink() {
         const url = getPublicUrl();
-        navigator.clipboard.writeText(url).then(() => showToast('✅ הקישור הועתק!')).catch(() => {
-            const input = document.createElement('input');
-            input.value = url;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-            showToast('✅ הקישור הועתק!');
-        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => showToast('✅ הקישור הועתק!')).catch(() => fallbackCopy(url));
+        } else {
+            fallbackCopy(url);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const input = document.createElement('input');
+        input.value = text;
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        try { document.execCommand('copy'); showToast('✅ הקישור הועתק!'); }
+        catch { showToast('❌ לא ניתן להעתיק'); }
+        document.body.removeChild(input);
     }
 
     function openPublicView() {
-        window.open(getPublicUrl(), '_blank');
+        window.open(getPublicUrl(), '_blank', 'noopener');
     }
 
-    // ─── VCARD ───
+    // ─── VCARD (תיקון injection) ───
+    function escapeVCard(str) {
+        return (str || '').replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+    }
+
     function downloadVCard() {
-        const v = `BEGIN:VCARD\nVERSION:3.0\nFN:${userData.name || 'User'}\nTEL:${userData.phone || ''}\nEMAIL:${currentUser ? currentUser.email : ''}\nNOTE:${userData.bio || ''}\nURL:${getPublicUrl()}\nEND:VCARD`;
+        const name = escapeVCard(userData.name || 'User');
+        const phone = escapeVCard(userData.phone || '');
+        const email = escapeVCard(currentUser ? currentUser.email : '');
+        const bio = escapeVCard(userData.bio || '');
+        const url = getPublicUrl();
+        const v = `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:${name}\r\nTEL:${phone}\r\nEMAIL:${email}\r\nNOTE:${bio}\r\nURL:${url}\r\nEND:VCARD`;
         const b = new Blob([v], { type: 'text/vcard;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(b);
         a.download = `${userData.name || 'contact'}.vcf`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
     }
 
     // ─── PRO SYSTEM ───
@@ -1183,35 +1326,26 @@
         if (isPro) { callback(); return; }
         openProModal();
     }
-
-    function openProModal() {
-        document.getElementById('proModal').classList.remove('hidden');
-    }
-
-    function closeProModal() {
-        document.getElementById('proModal').classList.add('hidden');
-    }
-
-    function upgradeToPro() {
-        openProModal();
-    }
+    function openProModal() { document.getElementById('proModal').classList.remove('hidden'); }
+    function closeProModal() { document.getElementById('proModal').classList.add('hidden'); }
+    function upgradeToPro() { openProModal(); }
 
     function activatePro() {
-        // In production: integrate payment gateway here (Stripe, PayPlus, etc.)
+        // בפרודקשן: שלב כאן שילוב עם שער תשלום (Stripe / PayPlus)
         closeProModal();
         showToast('🎉 ברוכים הבאים לחשבון PRO! (הדגמה)');
         userData.plan = 'pro';
         activateProUI();
-        if (currentUser) db.collection("users").doc(currentUser.uid).update({ plan: 'pro' });
+        if (currentUser) db.collection("users").doc(currentUser.uid).update({ plan: 'pro' }).catch(console.error);
     }
 
     function activateProUI() {
         isPro = true;
         document.getElementById('planBadge').classList.remove('hidden');
         document.getElementById('statsProLock').style.display = 'none';
-        document.getElementById('settingsBadge').textContent = 'PRO';
+        safeText('settingsBadge', 'PRO');
         document.getElementById('settingsBadge').className = 'pro-badge';
-        document.getElementById('settingsPlan').textContent = 'תוכנית PRO 👑';
+        safeText('settingsPlan', 'תוכנית PRO 👑');
     }
 
     function setBilling(type) {
@@ -1235,120 +1369,57 @@
         });
         if (name === 'stats') loadStats();
     }
-
     function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+    // ─── PLAN SELECTION UI ───
+    function selectPlan(plan) {
+        showToast(plan === 'pro' ? '💎 בחרת PRO' : plan === 'business' ? '🏢 בחרת עסקי' : '🆓 בחרת חינמי');
+    }
 
     // ─── TERMS ───
     const termsData = {
         full: {
             title: 'תנאי שימוש',
             content: `
-<div class="terms-section">
-    <h4>1. הסכמה לתנאים</h4>
-    <p>ברוך הבא ל-BioPro Cloud. בגישה לאתר ובשימוש בשירותים שלנו, אתה מסכים לתנאי שימוש אלה. אם אינך מסכים לתנאים, אנא הפסק להשתמש בשירות.</p>
-</div>
-<div class="terms-section">
-    <h4>2. תיאור השירות</h4>
-    <p>BioPro Cloud הוא שירות כרטיס ביקור דיגיטלי המאפשר לך ליצור פרופיל מקצועי עם קישורים, פרטים אישיים ותמונה. השירות מסופק "כפי שהוא" (as-is).</p>
-</div>
-<div class="terms-section">
-    <h4>3. הרשמה וחשבון</h4>
-    <p>ליצירת חשבון, עליך לספק מידע מדויק ועדכני. אתה אחראי לשמירת סודיות סיסמתך ולכל פעילות המתרחשת תחת חשבונך. עליך להודיע לנו מיד על כל שימוש בלתי מורשה בחשבונך.</p>
-</div>
-<div class="terms-section">
-    <h4>4. שימוש מותר</h4>
-    <p>מותר להשתמש בשירות למטרות עסקיות, אישיות ומקצועיות לגיטימיות בלבד. אין להשתמש בשירות לתוכן פוגעני, מטעה, פרסומות ספאם, או כל שימוש שעלול לפגוע בצד שלישי.</p>
-</div>
-<div class="terms-section">
-    <h4>5. תוכן המשתמש</h4>
-    <p>אתה שומר על זכויות הקניין הרוחני שלך על כל תוכן שאתה מעלה. אתה מעניק לנו רישיון מוגבל לאחסן ולהציג את התוכן שלך לצורך הפעלת השירות. אינך רשאי להעלות תוכן המפר זכויות יוצרים, תוכן פוגעני, תוכן מיני מפורש, או תוכן המעודד פעילות בלתי חוקית.</p>
-</div>
-<div class="terms-section">
-    <h4>6. מנויים ותשלומים</h4>
-    <p>חלק מהתכונות דורשות מנוי PRO בתשלום. התשלום מתחדש אוטומטית בהתאם למחזור החיוב שבחרת. ניתן לבטל בכל עת מהגדרות החשבון. אין החזרים על תקופה שכבר שולמה. המחירים עשויים להשתנות עם הודעה מוקדמת של 30 יום.</p>
-</div>
-<div class="terms-section">
-    <h4>7. הפסקת שירות</h4>
-    <p>BioPro Cloud שומרת לעצמה את הזכות להשעות או לסיים חשבונות המפרים תנאים אלה, ללא הודעה מוקדמת במקרים חמורים.</p>
-</div>
-<div class="terms-section">
-    <h4>8. הגבלת אחריות</h4>
-    <p>BioPro Cloud לא תישא באחריות לנזקים עקיפים, מקריים, או תוצאתיים הנובעים מהשימוש בשירות. אחריותנו הכוללת לא תעלה על הסכום ששילמת עבור השירות ב-12 החודשים האחרונים.</p>
-</div>
-<div class="terms-section">
-    <h4>9. שינויים בתנאים</h4>
-    <p>אנו עשויים לעדכן תנאים אלה מעת לעת. נודיע לך על שינויים מהותיים בדוא"ל או בהודעה בולטת באפליקציה. המשך שימוש לאחר השינויים מהווה הסכמה לתנאים המעודכנים.</p>
-</div>
-<div class="terms-section">
-    <h4>10. דין חל ושיפוט</h4>
-    <p>תנאים אלה כפופים לדין הישראלי. כל מחלוקת תידון בבתי המשפט המוסמכים בתל אביב-יפו, ישראל.</p>
-</div>
-<div class="terms-section">
-    <h4>11. צור קשר</h4>
-    <p>לשאלות בנושא תנאי שימוש: legal@biopro.cloud</p>
-</div>
+<div class="terms-section"><h4>1. הסכמה לתנאים</h4><p>ברוך הבא ל-BioPro Cloud. בגישה לאתר ובשימוש בשירותים שלנו, אתה מסכים לתנאי שימוש אלה.</p></div>
+<div class="terms-section"><h4>2. תיאור השירות</h4><p>BioPro Cloud הוא שירות כרטיס ביקור דיגיטלי המאפשר לך ליצור פרופיל מקצועי עם קישורים, פרטים אישיים ותמונה. השירות מסופק "כפי שהוא" (as-is).</p></div>
+<div class="terms-section"><h4>3. הרשמה וחשבון</h4><p>ליצירת חשבון, עליך לספק מידע מדויק ועדכני. אתה אחראי לשמירת סודיות סיסמתך ולכל פעילות המתרחשת תחת חשבונך.</p></div>
+<div class="terms-section"><h4>4. שימוש מותר</h4><p>מותר להשתמש בשירות למטרות עסקיות, אישיות ומקצועיות לגיטימיות בלבד. אין להשתמש בשירות לתוכן פוגעני, מטעה, פרסומות ספאם, או כל שימוש שעלול לפגוע בצד שלישי.</p></div>
+<div class="terms-section"><h4>5. תוכן המשתמש</h4><p>אתה שומר על זכויות הקניין הרוחני שלך על כל תוכן שאתה מעלה. אינך רשאי להעלות תוכן המפר זכויות יוצרים, תוכן פוגעני, תוכן מיני מפורש, או תוכן המעודד פעילות בלתי חוקית.</p></div>
+<div class="terms-section"><h4>6. מנויים ותשלומים</h4><p>חלק מהתכונות דורשות מנוי PRO בתשלום. ניתן לבטל בכל עת. אין החזרים על תקופה שכבר שולמה.</p></div>
+<div class="terms-section"><h4>7. הגבלת אחריות</h4><p>BioPro Cloud לא תישא באחריות לנזקים עקיפים, מקריים, או תוצאתיים הנובעים מהשימוש בשירות.</p></div>
+<div class="terms-section"><h4>8. דין חל ושיפוט</h4><p>תנאים אלה כפופים לדין הישראלי. כל מחלוקת תידון בבתי המשפט המוסמכים בתל אביב-יפו, ישראל.</p></div>
+<div class="terms-section"><h4>9. צור קשר</h4><p>לשאלות בנושא תנאי שימוש: legal@biopro.cloud</p></div>
             `
         },
         cookies: {
             title: 'מדיניות עוגיות',
             content: `
-<div class="terms-section">
-    <h4>מה הן עוגיות?</h4>
-    <p>עוגיות (Cookies) הן קבצי טקסט קטנים המאוחסנים בדפדפן שלך. הן מאפשרות לאתרים לזכור מידע על הביקור שלך.</p>
-</div>
-<div class="terms-section">
-    <h4>אילו עוגיות אנחנו משתמשים?</h4>
-    <p><strong style="color:#a5b4fc">עוגיות חיוניות:</strong> Firebase Auth משתמש בעוגיות לשמירת מצב ההתחברות שלך. ללא עוגיות אלה, לא תוכל להשתמש בשירות. <br><br><strong style="color:#a5b4fc">עוגיות ביצועים:</strong> אנו משתמשים בנתונים אנונימיים לשיפור ביצועי האתר.</p>
-</div>
-<div class="terms-section">
-    <h4>מה אנחנו לא עושים?</h4>
-    <p>אנחנו לא משתמשים בעוגיות פרסומיות, לא מוכרים נתוני עוגיות לצד שלישי, ולא עוקבים אחרייך ברחבי האינטרנט.</p>
-</div>
-<div class="terms-section">
-    <h4>שליטה בעוגיות</h4>
-    <p>ניתן לחסום עוגיות בהגדרות הדפדפן, אך הדבר עלול לפגוע בפונקציונליות האתר. ראה את הגדרות הדפדפן שלך לפרטים נוספים.</p>
-</div>
+<div class="terms-section"><h4>מה הן עוגיות?</h4><p>עוגיות (Cookies) הן קבצי טקסט קטנים המאוחסנים בדפדפן שלך. הן מאפשרות לאתרים לזכור מידע על הביקור שלך.</p></div>
+<div class="terms-section"><h4>אילו עוגיות אנחנו משתמשים?</h4><p>עוגיות חיוניות: Firebase Auth משתמש בעוגיות לשמירת מצב ההתחברות. ללא עוגיות אלה, לא תוכל להשתמש בשירות.</p></div>
+<div class="terms-section"><h4>מה אנחנו לא עושים?</h4><p>אנחנו לא משתמשים בעוגיות פרסומיות, לא מוכרים נתוני עוגיות לצד שלישי, ולא עוקבים אחרייך ברחבי האינטרנט.</p></div>
             `
         }
     };
 
     function openTerms(context) {
         const modal = document.getElementById('termsModal');
-        const title = document.getElementById('termsTitle');
-        const content = document.getElementById('termsContent');
-        const acceptBtn = document.getElementById('termsAcceptBtn');
-
-        if (context === 'cookies') {
-            title.textContent = termsData.cookies.title;
-            content.innerHTML = termsData.cookies.content;
-            acceptBtn.classList.add('hidden');
-        } else {
-            title.textContent = termsData.full.title;
-            content.innerHTML = termsData.full.content;
-            acceptBtn.classList.toggle('hidden', context !== 'login' && context !== 'upgrade');
-        }
-
+        safeText('termsTitle', context === 'cookies' ? termsData.cookies.title : termsData.full.title);
+        document.getElementById('termsContent').innerHTML = context === 'cookies' ? termsData.cookies.content : termsData.full.content;
+        document.getElementById('termsAcceptBtn').classList.toggle('hidden', context !== 'login' && context !== 'upgrade');
         modal.classList.remove('hidden');
     }
-
-    function closeTerms() {
-        document.getElementById('termsModal').classList.add('hidden');
-    }
-
+    function closeTerms() { document.getElementById('termsModal').classList.add('hidden'); }
     function acceptTerms() {
         closeTerms();
         showToast('✅ הסכמת לתנאי השימוש');
         if (currentUser) db.collection("users").doc(currentUser.uid).update({ termsAccepted: true }).catch(console.error);
     }
+    function openPrivacy() { document.getElementById('privacyModal').classList.remove('hidden'); }
 
-    function openPrivacy() {
-        document.getElementById('privacyModal').classList.remove('hidden');
-    }
-
-    // ─── SETTINGS ACTIONS ───
+    // ─── SETTINGS ───
     function updateSettingsUI(user) {
-        const emailEl = document.getElementById('settingsEmail');
-        if (emailEl) emailEl.textContent = user.email || user.displayName || 'משתמש';
+        safeText('settingsEmail', user.email || user.displayName || 'משתמש');
     }
 
     async function resetAllData() {
@@ -1374,89 +1445,188 @@
         }
     }
 
-    // ─── TOAST ───
+    // ─── TOAST (תיקון הבאג המקורי) ───
+    let toastTimeout;
     function showToast(msg) {
         const toast = document.getElementById('toast');
-        document.getElementById('toastMsg').textContent = msg;
-        toast.innerHTML = msg;
+        // textContent בטוח מ-XSS ומשמר את מבנה ה-toast
+        toast.textContent = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     // ─── PUBLIC VIEW (window.onload) ───
     window.onload = async () => {
         const params = new URLSearchParams(window.location.search);
         const uid = params.get('u');
-        if (uid) {
-            try {
-                const doc = await db.collection("users").doc(uid).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    const themeClass = data.theme || 'theme-classic';
-                    const isMinimal = themeClass === 'theme-minimal';
-                    const textColor = isMinimal ? 'text-gray-900' : 'text-white';
-                    const subColor = isMinimal ? 'text-gray-500' : 'text-white/60';
-                    const saveBtnStyle = isMinimal ? 'bg-gray-900 text-white' : 'bg-white/10 text-white border border-white/10';
+        if (!uid) return; // מצב ניהול — Auth ידאג לטעינה
 
-                    // Track view
-                    db.collection("users").doc(uid).update({ views: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+        // Skeleton loading
+        document.body.innerHTML = `
+            <div class="pub-skeleton">
+                <div class="w-full max-w-md min-h-screen flex flex-col items-center px-6 py-12" style="background:#050508">
+                    <div class="skeleton w-28 h-28 rounded-2xl mb-4"></div>
+                    <div class="skeleton w-40 h-6 rounded-lg mb-2"></div>
+                    <div class="skeleton w-56 h-4 rounded-lg mb-6"></div>
+                    <div class="space-y-3 w-full">
+                        <div class="skeleton w-full h-14 rounded-2xl"></div>
+                        <div class="skeleton w-full h-14 rounded-2xl"></div>
+                        <div class="skeleton w-full h-14 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>`;
 
-                    document.body.innerHTML = `
-                        <div class="min-h-screen flex items-center justify-center" style="background:#050508;background-image:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%)">
-                            <div class="w-full max-w-md min-h-screen ${themeClass} px-6 py-12 flex flex-col items-center">
-                                <img src="${data.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name||'U')}&background=random&size=200`}" 
-                                     class="w-28 h-28 rounded-2xl object-cover border-2 border-white/10 shadow-2xl"
-                                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.name||'U')}&background=6366f1&color=fff&size=200'">
-                                <h1 class="text-2xl font-display font-black mt-5 ${textColor}">${data.name || ''}</h1>
-                                ${data.title ? `<p class="text-sm ${subColor} mt-1 font-medium">${data.title}</p>` : ''}
-                                ${data.bio ? `<p class="${subColor} text-sm text-center mt-3 max-w-xs leading-relaxed">${data.bio}</p>` : ''}
-                                <button onclick="(function(){
-                                    const v='BEGIN:VCARD\\nVERSION:3.0\\nFN:${data.name||''}\\nTEL:${data.phone||''}\\nNOTE:${data.bio||''}\\nEND:VCARD';
-                                    const b=new Blob([v],{type:'text/vcard'});
-                                    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='${data.name||'contact'}.vcf';a.click();
-                                })()" class="${saveBtnStyle} mt-5 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2">
-                                    <i class='fa-solid fa-address-card'></i> שמור איש קשר
-                                </button>
-                                <div class="w-full mt-8 space-y-3" id="pubLinks"></div>
-                                ${!data.plan || data.plan === 'free' ? `<p class="text-[10px] text-white/20 mt-10">נוצר עם <a href="${window.location.href.split('?')[0]}" class="underline hover:text-white/40">BioPro Cloud</a></p>` : ''}
-                            </div>
-                        </div>`;
-                    // Render links
-                    const linksEl = document.getElementById('pubLinks');
-                    (data.links || []).forEach((l, i) => {
-                        if (!l.t) return;
-                        const s = getSocialStylePublic(l.u || '');
-                        const a = document.createElement('a');
-                        a.href = l.u || '#';
-                        a.target = '_blank';
-                        a.className = `link-anim flex items-center justify-between px-5 py-4 rounded-2xl font-bold text-sm text-white hover:scale-105 transition-all hover:shadow-lg ${isMinimal ? 'bg-slate-100 text-gray-900 border border-slate-200' : s.color}`;
-                        a.style.animationDelay = `${i * 0.08}s`;
-                        a.innerHTML = `<div class="flex items-center gap-3"><i class="${s.icon}"></i><span>${l.t}</span></div><i class="fa-solid fa-chevron-left text-xs opacity-40"></i>`;
-                        a.onclick = () => db.collection("users").doc(uid).collection("events").add({type:'click', link:i, ts:new Date()}).catch(()=>{});
-                        linksEl.appendChild(a);
-                    });
-                }
-            } catch(e) { console.error(e); }
+        try {
+            const doc = await db.collection("users").doc(uid).get();
+            if (!doc.exists) {
+                document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050508;color:white;font-family:sans-serif;"><p>הפרופיל לא נמצא</p></div>';
+                return;
+            }
+            const data = doc.data();
+            const themeClass = data.theme || 'theme-classic';
+            const isMinimal = themeClass === 'theme-minimal';
+            const textColor = isMinimal ? 'color:#0f172a' : 'color:white';
+            const subColor = isMinimal ? 'color:#64748b' : 'color:rgba(255,255,255,0.6)';
+
+            // Track view
+            db.collection("users").doc(uid).update({ views: firebase.firestore.FieldValue.increment(1) }).catch(() => {});
+
+            // בנה DOM בצורה בטוחה (ללא innerHTML עם data מ-Firestore)
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050508;background-image:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%)';
+
+            const card = document.createElement('div');
+            card.className = `w-full max-w-md min-h-screen ${themeClass} px-6 py-12 flex flex-col items-center`;
+
+            const img = document.createElement('img');
+            img.src = data.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'U')}&background=random&size=200`;
+            img.className = 'w-28 h-28 rounded-2xl object-cover border-2 border-white/10 shadow-2xl';
+            img.alt = 'תמונת פרופיל';
+            img.loading = 'lazy';
+            img.onerror = () => { img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'U')}&background=6366f1&color=fff&size=200`; };
+
+            const nameEl = document.createElement('h1');
+            nameEl.className = 'text-2xl font-black mt-5';
+            nameEl.style.cssText = 'font-family:Syne,sans-serif;' + textColor;
+            nameEl.textContent = data.name || '';
+
+            card.appendChild(img);
+            card.appendChild(nameEl);
+
+            if (data.title) {
+                const titleEl = document.createElement('p');
+                titleEl.className = 'text-sm mt-1 font-medium';
+                titleEl.style.cssText = subColor;
+                titleEl.textContent = data.title;
+                card.appendChild(titleEl);
+            }
+
+            if (data.bio) {
+                const bioEl = document.createElement('p');
+                bioEl.className = 'text-sm text-center mt-3 max-w-xs leading-relaxed';
+                bioEl.style.cssText = subColor;
+                bioEl.textContent = data.bio;
+                card.appendChild(bioEl);
+            }
+
+            // Save contact button
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'mt-5 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2';
+            saveBtn.style.cssText = isMinimal ? 'background:#0f172a;color:white' : 'background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.1)';
+            saveBtn.innerHTML = '<i class="fa-solid fa-address-card"></i> שמור איש קשר';
+            saveBtn.onclick = () => {
+                const name = (data.name || '').replace(/[\\,;\n]/g, m => '\\' + m);
+                const phone = (data.phone || '').replace(/[\\,;\n]/g, m => '\\' + m);
+                const bio = (data.bio || '').replace(/\n/g, '\\n');
+                const v = `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:${name}\r\nTEL:${phone}\r\nNOTE:${bio}\r\nEND:VCARD`;
+                const b = new Blob([v], { type: 'text/vcard;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(b);
+                a.download = (data.name || 'contact') + '.vcf';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                db.collection("users").doc(uid).update({ saves: firebase.firestore.FieldValue.increment(1) }).catch(() => {});
+            };
+            card.appendChild(saveBtn);
+
+            // Links
+            const linksDiv = document.createElement('div');
+            linksDiv.className = 'w-full mt-8 space-y-3';
+
+            const getSocialStylePublic = (url) => {
+                const l = (url || '').toLowerCase();
+                if(l.includes('instagram')) return { icon:'fa-brands fa-instagram', color:'background:linear-gradient(to right,#833ab4,#fd1d1d)' };
+                if(l.includes('tiktok')) return { icon:'fa-brands fa-tiktok', color:'background:#010101' };
+                if(l.includes('wa.me')||l.includes('whatsapp')) return { icon:'fa-brands fa-whatsapp', color:'background:#25D366' };
+                if(l.includes('facebook')) return { icon:'fa-brands fa-facebook', color:'background:#1877F2' };
+                if(l.includes('linkedin')) return { icon:'fa-brands fa-linkedin', color:'background:#0A66C2' };
+                if(l.includes('twitter')||l.includes('x.com')) return { icon:'fa-brands fa-x-twitter', color:'background:#000' };
+                if(l.includes('youtube')) return { icon:'fa-brands fa-youtube', color:'background:#FF0000' };
+                if(l.includes('spotify')) return { icon:'fa-brands fa-spotify', color:'background:#1DB954' };
+                if(l.includes('github')) return { icon:'fa-brands fa-github', color:'background:#24292e' };
+                if(l.includes('mailto:')) return { icon:'fa-solid fa-envelope', color:'background:#6366f1' };
+                if(l.includes('tel:')) return { icon:'fa-solid fa-phone', color:'background:#16a34a' };
+                return { icon:'fa-solid fa-link', color:'background:#4338ca' };
+            };
+
+            (data.links || []).forEach((l, i) => {
+                if (!l.t) return;
+                const s = getSocialStylePublic(l.u || '');
+                const a = document.createElement('a');
+                a.href = l.u || '#';
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:16px;font-weight:700;font-size:14px;color:white;text-decoration:none;transition:transform 0.2s;animation:fadeUp 0.35s ease both;animation-delay:${i * 0.08}s;${isMinimal ? 'background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0' : s.color}`;
+
+                const left = document.createElement('div');
+                left.style.cssText = 'display:flex;align-items:center;gap:12px';
+                const icon = document.createElement('i');
+                icon.className = s.icon;
+                const span = document.createElement('span');
+                span.textContent = l.t; // textContent — בטוח
+                const chevron = document.createElement('i');
+                chevron.className = 'fa-solid fa-chevron-left';
+                chevron.style.cssText = 'font-size:11px;opacity:0.4';
+
+                left.appendChild(icon);
+                left.appendChild(span);
+                a.appendChild(left);
+                a.appendChild(chevron);
+
+                a.onmouseenter = () => a.style.transform = 'scale(1.03)';
+                a.onmouseleave = () => a.style.transform = 'scale(1)';
+                a.onclick = () => db.collection("users").doc(uid).collection("events").add({ type:'click', link:i, ts:new Date() }).catch(() => {});
+
+                linksDiv.appendChild(a);
+            });
+
+            card.appendChild(linksDiv);
+
+            if (!data.plan || data.plan === 'free') {
+                const brand = document.createElement('p');
+                brand.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.2);margin-top:40px';
+                brand.textContent = 'נוצר עם BioPro Cloud';
+                card.appendChild(brand);
+            }
+
+            wrapper.appendChild(card);
+            document.body.innerHTML = '';
+            document.body.appendChild(wrapper);
+
+        } catch(e) {
+            console.error('Public view error:', e);
+            document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050508;color:white;font-family:sans-serif;"><p>אירעה שגיאה בטעינת הפרופיל</p></div>';
         }
     };
-
-    // ─── PLAN SELECTION UI ───
-    function selectPlan(plan) {
-        ['free','pro','business'].forEach(p => {
-            const card = document.querySelector(`.plan-card:nth-child(${p==='free'?1:p==='pro'?2:3})`);
-            if (card) card.classList.remove('selected');
-        });
-        // Just highlight
-        showToast(plan === 'pro' ? '💎 בחרת PRO' : plan === 'business' ? '🏢 בחרת עסקי' : '🆓 בחרת חינמי');
-    }
 
     // ─── KEYBOARD SHORTCUTS ───
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            document.getElementById('shareModal').classList.add('hidden');
-            document.getElementById('termsModal').classList.add('hidden');
-            document.getElementById('proModal').classList.add('hidden');
-            document.getElementById('privacyModal').classList.add('hidden');
+            ['shareModal','termsModal','proModal','privacyModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
         }
         if ((e.metaKey || e.ctrlKey) && e.key === 's') {
             e.preventDefault();
@@ -1464,64 +1634,17 @@
         }
     });
 
-    // ─── DRAG & DROP LINKS REORDER ───
-    let dragSrc = null;
-    document.addEventListener('dragstart', (e) => {
-        const row = e.target.closest('.link-row');
-        if (!row) return;
-        dragSrc = row;
-        setTimeout(() => row.style.opacity = '0.4', 0);
-    });
-    document.addEventListener('dragend', (e) => {
-        const row = e.target.closest('.link-row');
-        if (row) row.style.opacity = '1';
-    });
-    document.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const row = e.target.closest('.link-row');
-        if (!row || row === dragSrc) return;
-        const container = document.getElementById('linksEditor');
-        const rows = [...container.querySelectorAll('.link-row')];
-        const srcIdx = rows.indexOf(dragSrc);
-        const dstIdx = rows.indexOf(row);
-        if (srcIdx < 0 || dstIdx < 0) return;
-        const removed = userData.links.splice(srcIdx, 1)[0];
-        userData.links.splice(dstIdx, 0, removed);
-        renderEditor();
-        autoSave();
+    // ─── CLOSE MODALS ON BACKDROP CLICK ───
+    ['shareModal','termsModal','proModal','privacyModal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', (e) => { if (e.target === el) el.classList.add('hidden'); });
     });
 
     // ─── HELPER: DEBOUNCE ───
     function debounce(fn, delay) {
         let t;
         return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
-    }
-
-    // ─── CLOSE MODALS ON BACKDROP CLICK ───
-    ['shareModal','termsModal','proModal','privacyModal'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('click', (e) => {
-            if (e.target === el) {
-                el.classList.add('hidden');
-            }
-        });
-    });
-
-    function getSocialStylePublic(url) {
-        const l = url.toLowerCase();
-        if(l.includes('instagram')) return { icon:'fa-brands fa-instagram', color:'bg-gradient-to-r from-[#833ab4] to-[#fd1d1d]' };
-        if(l.includes('tiktok')) return { icon:'fa-brands fa-tiktok', color:'bg-[#010101]' };
-        if(l.includes('wa.me')||l.includes('whatsapp')) return { icon:'fa-brands fa-whatsapp', color:'bg-[#25D366]' };
-        if(l.includes('facebook')) return { icon:'fa-brands fa-facebook', color:'bg-[#1877F2]' };
-        if(l.includes('linkedin')) return { icon:'fa-brands fa-linkedin', color:'bg-[#0A66C2]' };
-        if(l.includes('twitter')||l.includes('x.com')) return { icon:'fa-brands fa-x-twitter', color:'bg-black' };
-        if(l.includes('youtube')) return { icon:'fa-brands fa-youtube', color:'bg-[#FF0000]' };
-        if(l.includes('spotify')) return { icon:'fa-brands fa-spotify', color:'bg-[#1DB954]' };
-        if(l.includes('github')) return { icon:'fa-brands fa-github', color:'bg-[#24292e]' };
-        if(l.includes('mailto:')) return { icon:'fa-solid fa-envelope', color:'bg-indigo-600' };
-        if(l.includes('tel:')) return { icon:'fa-solid fa-phone', color:'bg-green-600' };
-        return { icon:'fa-solid fa-link', color:'bg-indigo-700' };
     }
 </script>
 </body>
